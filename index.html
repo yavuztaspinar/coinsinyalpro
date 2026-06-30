@@ -97,7 +97,7 @@
             display: none;
         }
         .bar-inner { width: 0%; height: 100%; background: var(--gold); transition: width 0.1s ease-out; }
-        
+         
         .table-responsive {
             width: 100%;
             overflow-x: auto;
@@ -129,7 +129,7 @@
         <div class="input-group">
             <label>Veri Kaynağı Modu</label>
             <select id="sourceMode">
-                <option value="binance" selected>Binance Canlı Matris</option>
+                <option value="binance" selected>Binance Canlı Matris (Proxy Bağlantılı)</option>
             </select>
         </div>
         <div class="input-group">
@@ -209,10 +209,15 @@
         "W": { risk: "ENFLASYON", detay: "Erken dönem kilit açılımları mevcut.", maxArz: "Yüksek Arz" }
     };
 
+    // GitHub Pages CORS hatasını çözmek için AllOrigins Proxy fonksiyonu
+    function getProxyUrl(targetUrl) {
+        return `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+    }
+
     async function entegreEtVeYukle() {
         try {
             document.getElementById("info").innerText = "⏳ Binance veri matrisi senkronize ediliyor...";
-            const infoRes = await fetch('https://api.binance.com/api/v3/exchangeInfo');
+            const infoRes = await fetch(getProxyUrl('https://api.binance.com/api/v3/exchangeInfo'));
             const infoData = await infoRes.json();
 
             let currentRank = 1;
@@ -476,7 +481,7 @@
         const list = document.getElementById("list");
 
         btn.disabled = true;
-        table.style.display = "table"; // BURASI DÜZELTİLDİ: Tarama esnasında tabloyu gizlemiyoruz ki pariteler geldikçe eklensin
+        table.style.display = "table"; 
         list.innerHTML = "";
         barBg.style.display = "block";
         bar.style.width = "0%";
@@ -485,7 +490,7 @@
 
         try {
             info.innerText = "⚡ Canlı hacim verileri borsadan alınıyor...";
-            const tickerRes = await fetch("https://api.binance.com/api/v3/ticker/24hr");
+            const tickerRes = await fetch(getProxyUrl("https://api.binance.com/api/v3/ticker/24hr"));
             if(!tickerRes.ok) throw new Error("Borsa veri akışı kesildi.");
             const tickerData = await tickerRes.json();
 
@@ -517,7 +522,7 @@
 
                 await Promise.all(chunk.map(async (coin) => {
                     try {
-                        const kRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin.symbol}&interval=${tf}&limit=500`);
+                        const kRes = await fetch(getProxyUrl(`https://api.binance.com/api/v3/klines?symbol=${coin.symbol}&interval=${tf}&limit=500`));
                         if(!kRes.ok) return;
                         const klines = await kRes.json();
                         if(!klines || klines.length < 202) return;
@@ -539,7 +544,6 @@
                         let isPureDip = (rsiNow !== null && rsiNow <= rsiLimit && dipData && dipData.isPureDip);
                         let isDivActive = divData && divData.isDiv;
 
-                        // BURASI DÜZELTİLDİ: "all" seçildiğinde engeli aşmasını sağladık
                         if (strategyMode !== "all") {
                             if (strategyMode === "reversal" && !isReversal && !isDivActive) return;
                             if (strategyMode === "pure_dip" && !isPureDip) return;
