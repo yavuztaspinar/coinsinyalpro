@@ -97,7 +97,8 @@
             display: none;
         }
         .bar-inner { width: 0%; height: 100%; background: var(--gold); transition: width 0.1s ease-out; }
-         
+        
+        /* Mobil Kayma ve Taşma Koruması İçin Eklenen Wrapper */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
@@ -129,7 +130,7 @@
         <div class="input-group">
             <label>Veri Kaynağı Modu</label>
             <select id="sourceMode">
-                <option value="binance" selected>Binance Canlı Matris (Çift Hatlı)</option>
+                <option value="binance" selected>Binance Canlı Matris</option>
             </select>
         </div>
         <div class="input-group">
@@ -209,41 +210,11 @@
         "W": { risk: "ENFLASYON", detay: "Erken dönem kilit açılımları mevcut.", maxArz: "Yüksek Arz" }
     };
 
-    // Çökmeyi önleyen dinamik çift proxy ve doğrudan bağlantı fonksiyonu
-    async function fetchFromProxy(targetUrl) {
-        // Birinci Hat: Doğrudan Binance API uçları (CORS bazen izin verir)
-        try {
-            const response = await fetch(targetUrl);
-            if (response.ok) return await response.json();
-        } catch (e) { console.log("Doğrudan hat başarısız, proxy deneniyor..."); }
-
-        // İkinci Hat: En kararlı çalışan CORS.xyz / AllOrigins hibrit mimarisi
-        try {
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&nocache=${Date.now()}`;
-            const response = await fetch(proxyUrl);
-            if (response.ok) {
-                const wrapperData = await response.json();
-                if (wrapperData && wrapperData.contents) {
-                    return JSON.parse(wrapperData.contents);
-                }
-            }
-        } catch (e) { console.log("Birinci proxy başarısız, yedek proxy deneniyor..."); }
-
-        // Üçüncü Hat: Esnek CORS Proxy Ucu
-        const backupProxy = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
-        const responseBackup = await fetch(backupProxy);
-        if (!responseBackup.ok) throw new Error("Tüm veri hatları meşgul. Lütfen az sonra tekrar deneyin.");
-        return await responseBackup.json();
-    }
-
     async function entegreEtVeYukle() {
         try {
             document.getElementById("info").innerText = "⏳ Binance veri matrisi senkronize ediliyor...";
-            const infoData = await fetchFromProxy('https://api.binance.com/api/v3/exchangeInfo');
-
-            if(!infoData || !infoData.symbols) {
-                throw new Error("Veri paketi çözülemedi.");
-            }
+            const infoRes = await fetch('https://api.binance.com/api/v3/exchangeInfo');
+            const infoData = await infoRes.json();
 
             let currentRank = 1;
             backupCryptoMatrix = infoData.symbols
@@ -260,7 +231,7 @@
         } catch (error) {
             console.error(error);
             document.getElementById("info").style.color = "var(--red)";
-            document.getElementById("info").innerText = "❌ Binance API bağlantı hatası! Sayfayı yenileyin veya farklı bir tarayıcıdan deneyin.";
+            document.getElementById("info").innerText = "❌ Binance API bağlantı hatası! Sayfayı yenileyin.";
         }
     }
 
@@ -467,6 +438,7 @@
             return { action: "RİSK", class: "trade-sell", confirmed: false, isCustomReason: true, reason: "KİLİT RİSKİ" };
         }
         
+        // Boşluk Hatası Düzeltildi
         const rsiDonusOnay = rsiPrev !== null && rsiNow > rsiPrev && (rsiPrev < (rsiLimit + 5)); 
         const macdConf = macdData && (macdData.macd > macdData.signal);
         const volConf = volData && volData.isSpike;
@@ -475,7 +447,7 @@
         const isDivergenceBuy = (divData && divData.isDiv);
         const isReversalBuy = rsiDonusOnay && macdConf;
         const isDipBuy = (rsiNow <= rsiLimit && dipData && dipData.isPureDip && rsiNow > rsiPrev);
-                                      
+                              
         if (isReversalBuy || isDipBuy || isDivergenceBuy) {
             let isFullyConfirmed = (macdConf && vwmaConf) || (isDivergenceBuy && (rsiNow > rsiPrev || volConf)) || (vwmaData && vwmaData.state.includes("🚀"));
             if (riskliArzListesi[coinSymbol] && !volConf) isFullyConfirmed = false; 
@@ -486,7 +458,7 @@
         const isOverboughtSell = (rsiNow >= 72 && rsiPrev !== null && rsiNow < rsiPrev);
         const isMacdBearishCross = (macdData && macdData.macd < macdData.signal && macdData.prevMacd >= macdData.prevSignal);
         const isDeathCrossState = crossData && crossData.isBearish;
-                                
+                        
         if (isOverboughtSell || (rsiNow > 60 && isMacdBearishCross) || (rsiNow > 65 && isDeathCrossState)) {
             return { action: "SAT", class: "trade-sell", confirmed: true };
         }
@@ -506,7 +478,7 @@
         const list = document.getElementById("list");
 
         btn.disabled = true;
-        table.style.display = "table"; 
+        table.style.display = "none";
         list.innerHTML = "";
         barBg.style.display = "block";
         bar.style.width = "0%";
@@ -515,11 +487,9 @@
 
         try {
             info.innerText = "⚡ Canlı hacim verileri borsadan alınıyor...";
-            const tickerData = await fetchFromProxy("https://api.binance.com/api/v3/ticker/24hr");
-
-            if(!tickerData || !Array.isArray(tickerData)) {
-                throw new Error("Hacim listesi alınamadı, borsa hattı yoğun.");
-            }
+            const tickerRes = await fetch("https://api.binance.com/api/v3/ticker/24hr");
+            if(!tickerRes.ok) throw new Error("Borsa veri akışı kesildi.");
+            const tickerData = await tickerRes.json();
 
             let min = 0, max = Infinity;
             if(filterChoice === "100k-500k") { min = 100000; max = 500000; }
@@ -540,7 +510,7 @@
 
             if (targets.length === 0) throw new Error("Filtreye uygun aktif parite bulunamadı.");
 
-            const chunkSize = 6; 
+            const chunkSize = 15; 
 
             for (let i = 0; i < targets.length; i += chunkSize) {
                 const chunk = targets.slice(i, i + chunkSize);
@@ -549,8 +519,10 @@
 
                 await Promise.all(chunk.map(async (coin) => {
                     try {
-                        const klines = await fetchFromProxy(`https://api.binance.com/api/v3/klines?symbol=${coin.symbol}&interval=${tf}&limit=300`);
-                        if(!klines || !Array.isArray(klines) || klines.length < 150) return;
+                        const kRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin.symbol}&interval=${tf}&limit=500`);
+                        if(!kRes.ok) return;
+                        const klines = await kRes.json();
+                        if(!klines || klines.length < 202) return;
 
                         let rsiValues = calculateAllRSI(klines);
                         let rsiNow = rsiValues[rsiValues.length - 1];
@@ -569,10 +541,8 @@
                         let isPureDip = (rsiNow !== null && rsiNow <= rsiLimit && dipData && dipData.isPureDip);
                         let isDivActive = divData && divData.isDiv;
 
-                        if (strategyMode !== "all") {
-                            if (strategyMode === "reversal" && !isReversal && !isDivActive) return;
-                            if (strategyMode === "pure_dip" && !isPureDip) return;
-                        }
+                        if (strategyMode === "reversal" && !isReversal && !isDivActive) return;
+                        if (strategyMode === "pure_dip" && !isPureDip) return;
 
                         let signalType = "Yatay Trend";
                         if (isDivActive && isPureDip) signalType = "Uyuşmazlık + Dip";
@@ -621,11 +591,12 @@
                         list.appendChild(row);
                     } catch (e) { console.error(e); }
                 }));
-                await new Promise(r => setTimeout(r, 200));
+                await new Promise(r => setTimeout(r, 80));
             }
 
             document.getElementById("info").style.color = "var(--green)";
             document.getElementById("info").innerText = `🎯 Tarama Başarıyla Tamamlandı! Toplam ${list.children.length} parite listelendi.`;
+            table.style.display = "table";
 
         } catch (error) {
             console.error(error);
