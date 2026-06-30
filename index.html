@@ -129,7 +129,7 @@
         <div class="input-group">
             <label>Veri Kaynağı Modu</label>
             <select id="sourceMode">
-                <option value="binance" selected>Binance Canlı Matris (Proxy Bağlantılı)</option>
+                <option value="binance" selected>Binance Canlı Matris (Güvenli Proxy)</option>
             </select>
         </div>
         <div class="input-group">
@@ -209,16 +209,20 @@
         "W": { risk: "ENFLASYON", detay: "Erken dönem kilit açılımları mevcut.", maxArz: "Yüksek Arz" }
     };
 
-    // GitHub Pages CORS hatasını çözmek için AllOrigins Proxy fonksiyonu
-    function getProxyUrl(targetUrl) {
-        return `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+    // AllOrigins proxy sarmalayıcısından veriyi güvenle çıkaran fonksiyon
+    async function fetchFromProxy(targetUrl) {
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+        const response = await fetch(proxyUrl);
+        if (!response.ok) throw new Error("Proxy bağlantı hatası.");
+        const wrapperData = await response.json();
+        // wrapperData.contents string olarak döner, onu JSON objesine çeviriyoruz
+        return JSON.parse(wrapperData.contents);
     }
 
     async function entegreEtVeYukle() {
         try {
             document.getElementById("info").innerText = "⏳ Binance veri matrisi senkronize ediliyor...";
-            const infoRes = await fetch(getProxyUrl('https://api.binance.com/api/v3/exchangeInfo'));
-            const infoData = await infoRes.json();
+            const infoData = await fetchFromProxy('https://api.binance.com/api/v3/exchangeInfo');
 
             let currentRank = 1;
             backupCryptoMatrix = infoData.symbols
@@ -420,198 +424,4 @@
             vSumPrev += volP;
             closeSumPrev += closeP; 
         }
-        let vwmaPrev = vSumPrev === 0 ? 0 : pvSumPrev / vSumPrev;
-        let smaPrev = closeSumPrev / period;
-
-        if (vwmaPrev <= smaPrev && vwmaCurrent > smaCurrent) {
-            return { state: "🚀 Yukarı Kesişim", isBullish: true };
-        } else if (vwmaCurrent > smaCurrent) {
-            return { state: "📈 Boğa Eğilimi", isBullish: true };
-        } else {
-            return { state: "📉 Ayı Eğilimi", isBullish: false };
-        }
-    }
-
-    function generateTradeSignal(rsiNow, rsiPrev, macdData, volData, dipData, divData, rsiLimit, coinSymbol, vwmaData, crossData) {
-        if (rsiNow === null) return { action: "BEKLE", class: "trade-hold", confirmed: false };
-
-        const bugun = new Date();
-        const gun = bugun.getDate(); 
-
-        if (coinSymbol === "STRK" && (gun >= 12 && gun <= 17)) {
-            return { action: "RİSK", class: "trade-sell", confirmed: false, isCustomReason: true, reason: "KİLİT RİSKİ" };
-        }
-        
-        const rsiDonusOnay = rsiPrev !== null && rsiNow > rsiPrev && (rsiPrev < (rsiLimit + 5)); 
-        const macdConf = macdData && (macdData.macd > macdData.signal);
-        const volConf = volData && volData.isSpike;
-        const vwmaConf = vwmaData && vwmaData.isBullish;
-
-        const isDivergenceBuy = (divData && divData.isDiv);
-        const isReversalBuy = rsiDonusOnay && macdConf;
-        const isDipBuy = (rsiNow <= rsiLimit && dipData && dipData.isPureDip && rsiNow > rsiPrev);
-                                      
-        if (isReversalBuy || isDipBuy || isDivergenceBuy) {
-            let isFullyConfirmed = (macdConf && vwmaConf) || (isDivergenceBuy && (rsiNow > rsiPrev || volConf)) || (vwmaData && vwmaData.state.includes("🚀"));
-            if (riskliArzListesi[coinSymbol] && !volConf) isFullyConfirmed = false; 
-
-            return { action: "AL", class: "trade-buy", confirmed: isFullyConfirmed };
-        }
-
-        const isOverboughtSell = (rsiNow >= 72 && rsiPrev !== null && rsiNow < rsiPrev);
-        const isMacdBearishCross = (macdData && macdData.macd < macdData.signal && macdData.prevMacd >= macdData.prevSignal);
-        const isDeathCrossState = crossData && crossData.isBearish;
-                                
-        if (isOverboughtSell || (rsiNow > 60 && isMacdBearishCross) || (rsiNow > 65 && isDeathCrossState)) {
-            return { action: "SAT", class: "trade-sell", confirmed: true };
-        }
-        return { action: "BEKLE", class: "trade-hold", confirmed: false };
-    }
-
-    async function huntCombinations() {
-        const btn = document.getElementById("btn");
-        const tf = document.getElementById("tf").value;
-        const filterChoice = document.getElementById("filterChoice").value;
-        const rsiLimit = parseFloat(document.getElementById("limit").value);
-        const strategyMode = document.getElementById("strategyMode").value;
-        const info = document.getElementById("info");
-        const barBg = document.getElementById("barBg");
-        const bar = document.getElementById("bar");
-        const table = document.getElementById("table");
-        const list = document.getElementById("list");
-
-        btn.disabled = true;
-        table.style.display = "table"; 
-        list.innerHTML = "";
-        barBg.style.display = "block";
-        bar.style.width = "0%";
-        info.style.color = "var(--text)";
-        let targets = [];
-
-        try {
-            info.innerText = "⚡ Canlı hacim verileri borsadan alınıyor...";
-            const tickerRes = await fetch(getProxyUrl("https://api.binance.com/api/v3/ticker/24hr"));
-            if(!tickerRes.ok) throw new Error("Borsa veri akışı kesildi.");
-            const tickerData = await tickerRes.json();
-
-            let min = 0, max = Infinity;
-            if(filterChoice === "100k-500k") { min = 100000; max = 500000; }
-            else if(filterChoice === "500k-2m") { min = 500000; max = 2000000; }
-            else if(filterChoice === "2m-all") { min = 2000000; }
-
-            targets = backupCryptoMatrix.map(coin => {
-                const ticker = tickerData.find(t => t.symbol === coin.pair);
-                const quoteVol = ticker ? parseFloat(ticker.quoteVolume) : 0;
-                return {
-                    symbol: coin.pair,
-                    pureSymbol: coin.symbol,
-                    volume: quoteVol,
-                    volumeText: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(quoteVol),
-                    price: ticker ? parseFloat(ticker.lastPrice) : 0
-                };
-            }).filter(coin => coin.volume >= min && coin.volume <= max);
-
-            if (targets.length === 0) throw new Error("Filtreye uygun aktif parite bulunamadı.");
-
-            const chunkSize = 15; 
-
-            for (let i = 0; i < targets.length; i += chunkSize) {
-                const chunk = targets.slice(i, i + chunkSize);
-                bar.style.width = `${((i + chunk.length) / targets.length) * 100}%`;
-                info.innerText = `🔍 Tarama: %${Math.round(((i + chunk.length) / targets.length) * 100)} (${chunk[chunk.length - 1].pureSymbol})`;
-
-                await Promise.all(chunk.map(async (coin) => {
-                    try {
-                        const kRes = await fetch(getProxyUrl(`https://api.binance.com/api/v3/klines?symbol=${coin.symbol}&interval=${tf}&limit=500`));
-                        if(!kRes.ok) return;
-                        const klines = await kRes.json();
-                        if(!klines || klines.length < 202) return;
-
-                        let rsiValues = calculateAllRSI(klines);
-                        let rsiNow = rsiValues[rsiValues.length - 1];
-                        let rsiPrev = rsiValues[rsiValues.length - 2];
-                        
-                        let macdData = calculateMACD(klines);
-                        let volData = checkVolumeSpike(klines);
-                        let dipData = calculateHistoricalDip(klines);
-                        let divData = checkBullishDivergence(klines, rsiValues);
-                        let vwmaData = calculateVWMAAndCross(klines, 20);
-                        let crossData = checkGoldenDeathCross(klines);
-                        
-                        let tradeSignal = generateTradeSignal(rsiNow, rsiPrev, macdData, volData, dipData, divData, rsiLimit, coin.pureSymbol, vwmaData, crossData);
-
-                        let isReversal = (rsiPrev !== null && rsiNow !== null && rsiPrev < rsiLimit && rsiNow > rsiPrev);
-                        let isPureDip = (rsiNow !== null && rsiNow <= rsiLimit && dipData && dipData.isPureDip);
-                        let isDivActive = divData && divData.isDiv;
-
-                        if (strategyMode !== "all") {
-                            if (strategyMode === "reversal" && !isReversal && !isDivActive) return;
-                            if (strategyMode === "pure_dip" && !isPureDip) return;
-                        }
-
-                        let signalType = "Yatay Trend";
-                        if (isDivActive && isPureDip) signalType = "Uyuşmazlık + Dip";
-                        else if (isDivActive) signalType = "Pozitif Uyuşmazlık";
-                        else if (isReversal) signalType = "Dönüş Sinyali";
-                        else if (isPureDip) signalType = "Mutlak Dip";
-
-                        let arzBadge = `<span style="color:var(--text-muted); font-size:13px; font-weight:600;">Temiz</span>`;
-                        if (riskliArzListesi[coin.pureSymbol]) {
-                            const rInfo = riskliArzListesi[coin.pureSymbol];
-                            arzBadge = `<span style="color:var(--red); font-size:13px; font-weight:bold;">⚠️ ${rInfo.risk}</span>`;
-                        }
-
-                        let onayRozeti = '';
-                        if(tradeSignal.isCustomReason) {
-                            onayRozeti = `<span class="badge" style="color:#e67e22; background:rgba(230,126,34,0.12); border:1px solid #e67e22;">${tradeSignal.reason}</span>`;
-                        } else {
-                            onayRozeti = tradeSignal.confirmed ? '<span class="badge badge-confirm badge-strong-confirm">GÜÇLÜ</span>' : '<span class="badge badge-confirm badge-weak-confirm">Zayıf</span>';
-                        }
-
-                        let vwmaColor = vwmaData.state.includes("🚀") ? "var(--green)" : (vwmaData.isBullish ? "#2fc787" : "var(--red)");
-                        
-                        let crossColor = "var(--text-muted)";
-                        if(crossData.state.includes("GOLDEN")) crossColor = "var(--green)";
-                        else if(crossData.state.includes("DEATH")) crossColor = "var(--red)";
-                        else if(crossData.isBullish) crossColor = "#2fc787";
-                        else if(crossData.isBearish) crossColor = "#df334a";
-
-                        const row = document.createElement("tr");
-                        row.className = "match-row";
-                        row.innerHTML = `
-                            <td><strong style="font-size:16px; color:#000;">${coin.symbol}</strong></td>
-                            <td class="large-numeric" style="color:var(--text-muted);">${coin.volumeText}</td>
-                            <td>${arzBadge}</td>
-                            <td><span class="badge" style="background:rgba(199,157,0,0.1); color:var(--gold)">${signalType}</span></td>
-                            <td>${onayRozeti}</td>
-                            <td style="font-weight:700; color:${crossColor}">${crossData.state}</td>
-                            <td><span class="badge badge-trade ${tradeSignal.class}">${tradeSignal.action}</span></td>
-                            <td class="large-numeric" style="color:${rsiNow && rsiNow <= rsiLimit ? 'var(--green)' : 'var(--text)'}"><b>${rsiNow ? rsiNow.toFixed(2) : "N/A"}</b></td>
-                            <td style="font-weight:700; color:${macdData && macdData.macd > macdData.signal ? '#0db372':'#df334a'}">${macdData ? (macdData.macd > macdData.signal ? '🐂 Boğa' : '🐻 Ayı') : "N/A"}</td>
-                            <td class="large-numeric">${volData ? volData.ratio + "x" : "N/A"}</td>
-                            <td style="font-weight:700; color:${vwmaColor}">${vwmaData.state}</td>
-                            <td class="large-numeric" style="color:var(--blue)">%${dipData ? dipData.distance : "0.00"}</td>
-                            <td class="large-numeric" style="color:#b08b00">$${coin.price.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:6})}</td>
-                        `;
-                        list.appendChild(row);
-                    } catch (e) { console.error(e); }
-                }));
-                await new Promise(r => setTimeout(r, 80));
-            }
-
-            document.getElementById("info").style.color = "var(--green)";
-            document.getElementById("info").innerText = `🎯 Tarama Başarıyla Tamamlandı! Toplam ${list.children.length} parite listelendi.`;
-
-        } catch (error) {
-            console.error(error);
-            document.getElementById("info").style.color = "var(--red)";
-            document.getElementById("info").innerText = "❌ Hata Oluştu: " + error.message;
-        } finally {
-            btn.disabled = false;
-            barBg.style.display = "none";
-        }
-    }
-</script>
-
-</body>
-</html>
+        let vwmaPrev = vSumPrev === 0 ? 0 : pvSumPrev / v
