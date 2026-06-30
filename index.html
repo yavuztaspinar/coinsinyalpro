@@ -98,7 +98,6 @@
         }
         .bar-inner { width: 0%; height: 100%; background: var(--gold); transition: width 0.1s ease-out; }
         
-        /* Mobil Kayma ve Taşma Koruması İçin Eklenen Wrapper */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
@@ -438,7 +437,6 @@
             return { action: "RİSK", class: "trade-sell", confirmed: false, isCustomReason: true, reason: "KİLİT RİSKİ" };
         }
         
-        // Boşluk Hatası Düzeltildi
         const rsiDonusOnay = rsiPrev !== null && rsiNow > rsiPrev && (rsiPrev < (rsiLimit + 5)); 
         const macdConf = macdData && (macdData.macd > macdData.signal);
         const volConf = volData && volData.isSpike;
@@ -447,7 +445,7 @@
         const isDivergenceBuy = (divData && divData.isDiv);
         const isReversalBuy = rsiDonusOnay && macdConf;
         const isDipBuy = (rsiNow <= rsiLimit && dipData && dipData.isPureDip && rsiNow > rsiPrev);
-                              
+                                      
         if (isReversalBuy || isDipBuy || isDivergenceBuy) {
             let isFullyConfirmed = (macdConf && vwmaConf) || (isDivergenceBuy && (rsiNow > rsiPrev || volConf)) || (vwmaData && vwmaData.state.includes("🚀"));
             if (riskliArzListesi[coinSymbol] && !volConf) isFullyConfirmed = false; 
@@ -458,7 +456,7 @@
         const isOverboughtSell = (rsiNow >= 72 && rsiPrev !== null && rsiNow < rsiPrev);
         const isMacdBearishCross = (macdData && macdData.macd < macdData.signal && macdData.prevMacd >= macdData.prevSignal);
         const isDeathCrossState = crossData && crossData.isBearish;
-                        
+                                
         if (isOverboughtSell || (rsiNow > 60 && isMacdBearishCross) || (rsiNow > 65 && isDeathCrossState)) {
             return { action: "SAT", class: "trade-sell", confirmed: true };
         }
@@ -478,7 +476,7 @@
         const list = document.getElementById("list");
 
         btn.disabled = true;
-        table.style.display = "none";
+        table.style.display = "table"; // BURASI DÜZELTİLDİ: Tarama esnasında tabloyu gizlemiyoruz ki pariteler geldikçe eklensin
         list.innerHTML = "";
         barBg.style.display = "block";
         bar.style.width = "0%";
@@ -541,8 +539,11 @@
                         let isPureDip = (rsiNow !== null && rsiNow <= rsiLimit && dipData && dipData.isPureDip);
                         let isDivActive = divData && divData.isDiv;
 
-                        if (strategyMode === "reversal" && !isReversal && !isDivActive) return;
-                        if (strategyMode === "pure_dip" && !isPureDip) return;
+                        // BURASI DÜZELTİLDİ: "all" seçildiğinde engeli aşmasını sağladık
+                        if (strategyMode !== "all") {
+                            if (strategyMode === "reversal" && !isReversal && !isDivActive) return;
+                            if (strategyMode === "pure_dip" && !isPureDip) return;
+                        }
 
                         let signalType = "Yatay Trend";
                         if (isDivActive && isPureDip) signalType = "Uyuşmazlık + Dip";
@@ -596,7 +597,6 @@
 
             document.getElementById("info").style.color = "var(--green)";
             document.getElementById("info").innerText = `🎯 Tarama Başarıyla Tamamlandı! Toplam ${list.children.length} parite listelendi.`;
-            table.style.display = "table";
 
         } catch (error) {
             console.error(error);
