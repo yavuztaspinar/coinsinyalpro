@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kilit Takvimi - CoinSinyalPro</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; color: #333; }
+        nav { background: #333; padding: 15px; border-radius: 5px; }
+        nav a { color: white; text-decoration: none; margin-right: 15px; font-weight: bold; }
+        nav a:hover { color: #00adb5; }
+        .container { margin-top: 20px; background: white; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #00adb5; color: white; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="kilit-takvimi.html">Kilit Takvimi (1. Sayfa)</a>
+        <a href="tepe-dip.html">Tepe-Dip Analizi (2. Sayfa)</a>
+        <a href="kaldirac-analiz.html">Kaldıraç Analizi (3. Sayfa)</a>
+    </nav>
+
+    <div class="container">
+        <h1>Kilit Takvimi Verileri</h1>
+        <p>Aşağıdaki veriler dinamik olarak JSON dosyasından yüklenmektedir:</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Coin Adı</th>
+                    <th>Kilit Açılım Tarihi</th>
+                    <th>Miktar</th>
+                </tr>
+            </thead>
+            <tbody id="kilit-verileri">
+                <tr>
+                    <td colspan="3">Veriler yükleniyor...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // GitHub'daki 'veriler.json' dosyanı okur
+        fetch('veriler.json')
+            .then(response => {
+                if (!response.ok) throw new Error("JSON dosyası bulunamadı!");
+                return response.json();
+            })
+            .then(data => {
+                const tabloGövdesi = document.getElementById('kilit-verileri');
+                tabloGövdesi.innerHTML = ""; // Yükleniyor yazısını sil
+
+                // JSON içindeki 'kilit_takvimi' listesini döngüye alıyoruz
+                data.kilit_takvimi.forEach(item => {
+                    let satir = `<tr>
+                        <td><strong>${item.coin}</strong></td>
+                        <td>${item.tarih}</td>
+                        <td>${item.miktar}</td>
+                    </tr>`;
+                    tabloGövdesi.innerHTML += satir;
+                });
+            })
+            .catch(error => {
+                document.getElementById('kilit-verileri').innerHTML = 
+                    `<tr><td colspan="3" style="color:red;">Hata: Veriler yüklenemedi! (veriler.json dosyasını kontrol edin)</td></tr>`;
+                console.error(error);
+            });
+    </script>
+
+</body>
+</html>

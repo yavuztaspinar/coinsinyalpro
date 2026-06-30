@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binance Canlı Token Analiz & İndikatör Hesaplayıcı</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-weight: 600;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .coin-select-box {
+            background-color: #f8f9fa;
+            border: 2px dashed #f3ba2f; /* Binance sarısı */
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .api-btn {
+            background-color: #f3ba2f;
+            margin-top: 10px;
+            width: 100%;
+            color: #212529;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .api-btn:hover {
+            background-color: #dcb014;
+        }
+        button.calc-btn {
+            width: 100%;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            background-color: #007bff;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+        button.calc-btn:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            margin-top: 25px;
+            border-top: 2px solid #eee;
+            padding-top: 20px;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        .value {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .indicator-box {
+            margin-top: 15px;
+            background: #eee;
+            border-radius: 10px;
+            height: 24px;
+            overflow: hidden;
+            position: relative;
+        }
+        .indicator-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease, background-color 0.5s ease;
+        }
+        .status-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+        .zone-dip { background-color: #28a745; color: white; } /* Akümülasyon / Alım */
+        .zone-fair { background-color: #ffc107; color: #212529; } /* Adil Değer */
+        .zone-tepe { background-color: #dc3545; color: white; } /* Dağıtım / Satım */
+        
+        #apiStatus {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+            display: block;
+            text-align: center;
+        }
+        .target-box {
+            background-color: #f8f9fa;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 15px;
+        }
+        .target-title {
+            font-weight: bold;
+            font-size: 14px;
+            color: #4a5568;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Binance Canlı Veri Analizi</h2>
+    <div class="subtitle">TVL & Arz Tabanlı İndikatör Hesaplayıcı</div>
+    
+    <div class="coin-select-box">
+        <label for="coinTickerList" style="color: #dcb014;">Binance İşlem Çifti Seçin:</label>
+        <select id="coinTickerList" onchange="tickerGuncelle(this.value)">
+            <option value="BTCUSDT">Bitcoin (BTC / USDT)</option>
+            <option value="ETHUSDT">Ethereum (ETH / USDT)</option>
+            <option value="MKRUSDT">Maker (MKR / USDT)</option>
+            <option value="AAVEUSDT">Aave (AAVE / USDT)</option>
+            <option value="custom">-- KENDİM ÇİFT YAZACAĞIM --</option>
+        </select>
+        
+        <input type="text" id="coinTickerInput" value="BTCUSDT" placeholder="Örn: BTCUSDT, SOLUSDT" style="margin-top: 10px; display: none;">
+        
+        <button class="api-btn" onclick="binanceVerisiniCek()">🔄 BINANCE'DEN ANLIK FİYAT ÇEK</button>
+        <span id="apiStatus">Durum: Bekleniyor...</span>
+    </div>
+
+    <div class="input-group">
+        <label for="price">Birim Token Fiyatı ($):</label>
+        <input type="number" id="price" value="0.0" step="0.000001">
+    </div>
+    
+    <div class="input-group">
+        <label for="circulating">Dolaşımdaki Arz (Adet):</label>
+        <input type="number" id="circulating" value="19700000">
+    </div>
+    
+    <div class="input-group">
+        <label for="maxSupply">Maksimum Arz (Adet):</label>
+        <input type="number" id="maxSupply" value="21000000">
+    </div>
+    
+    <div class="input-group">
+        <label for="tvl">Protokol TVL (Kilitli Değer $):</label>
+        <input type="number" id="tvl" value="1000000000">
+    </div>
+    
+    <button class="calc-btn" onclick="hesapla()">İNDİKATÖRÜ ANALİZ ET</button>
+    
+    <div class="results" id="resultsBox" style="display:none;">
+        <div class="result-item">
+            <span>Piyasa Değeri (Market Cap):</span>
+            <span class="value" id="resMarketCap">$0.00</span>
+        </div>
+        <div class="result-item">
+            <span>Tam Seyreltilmiş Değer (FDV):</span>
+            <span class="value" id="resFDV">$0.00</span>
+        </div>
+        <div class="result-item">
+            <span>Piyasa Değeri / TVL Oranı:</span>
+            <span class="value" id="resRatio">0.00</span>
+        </div>
+        
+        <div class="indicator-box">
+            <div id="indicatorBar" class="indicator-bar"></div>
+        </div>
+        
+        <div id="statusMessage" class="status-box"></div>
+
+        <div class="target-box">
+            <div class="target-title">🎯 İndikatör Strateji Seviyeleri</div>
+            <div class="result-item" style="font-size: 14px; margin-bottom: 6px;">
+                <span style="color: #28a745; font-weight: bold;">Stratejik Alım Bölgesi (Mcap/TVL = 0.3):</span>
+                <span class="value" id="targetDipPrice" style="color: #28a745;">$0.00</span>
+            </div>
+            <div class="result-item" style="font-size: 14px; margin-bottom: 0;">
+                <span style="color: #dc3545; font-weight: bold;">Riskli Satım Bölgesi (Mcap/TVL = 1.2):</span>
+                <span class="value" id="targetTepePrice" style="color: #dc3545;">$0.00</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+window.onload = function() {
+    binanceVerisiniCek();
+};
+
+function tickerGuncelle(deger) {
+    const inputAlani = document.getElementById('coinTickerInput');
+    if(deger === 'custom') {
+        inputAlani.style.display = 'block';
+        inputAlani.value = '';
+    } else {
+        inputAlani.style.display = 'none';
+        inputAlani.value = deger;
+    }
+}
+
+async function binanceVerisiniCek() {
+    let ticker = document.getElementById('coinTickerList').value;
+    if(ticker === 'custom') {
+        ticker = document.getElementById('coinTickerInput').value.trim().toUpperCase();
+    }
+    
+    const statusText = document.getElementById('apiStatus');
+    if(!ticker) {
+        statusText.innerText = "Durum: Lütfen geçerli bir işlem çifti girin!";
+        statusText.style.color = "red";
+        return;
+    }
+
+    statusText.innerText = `Durum: Binance üzerinden ${ticker} fiyatı alınıyor...`;
+    statusText.style.color = "#666";
+    
+    try {
+        const url = `https://api.binance.com/api/v3/ticker/price?symbol=${ticker}`;
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            if(response.status === 400) {
+                throw new Error("Geçersiz işlem çifti sembolü.");
+            }
+            throw new Error("Binance bağlantı hatası.");
+        }
+        
+        const data = await response.json();
+        
+        if(data && data.price) {
+            const anlikFiyat = parseFloat(data.price);
+            document.getElementById('price').value = anlikFiyat;
+            
+            if(ticker === 'BTCUSDT') {
+                document.getElementById('circulating').value = 19700000; 
+                document.getElementById('maxSupply').value = 21000000;
+                document.getElementById('tvl').value = 25000000000; // Güncel tahminî DeFi/L2 kilitli değerler baz alınabilir
+            } else if(ticker === 'ETHUSDT') {
+                document.getElementById('circulating').value = 120000000; 
+                document.getElementById('maxSupply').value = 120000000;
+                document.getElementById('tvl').value = 50000000000;
+            } else if(ticker === 'MKRUSDT') {
+                document.getElementById('circulating').value = 880000; 
+                document.getElementById('maxSupply').value = 1005000;
+                document.getElementById('tvl').value = 7500000000;
+            } else if(ticker === 'AAVEUSDT') {
+                document.getElementById('circulating').value = 14900000; 
+                document.getElementById('maxSupply').value = 16000000;
+                document.getElementById('tvl').value = 11000000000;
+            }
+
+            statusText.innerText = `Durum: Başarılı! Binance canlı fiyatı güncellendi.`;
+            statusText.style.color = "green";
+        } else {
+            statusText.innerText = "Durum: İşlem çifti bulunamadı. Örn: BTCUSDT";
+            statusText.style.color = "orange";
+        }
+    } catch (error) {
+        console.error(error);
+        statusText.innerText = `Durum: Hata - ${error.message}`;
+        statusText.style.color = "red";
+    }
+}
+
+function hesapla() {
+    const fiyat = parseFloat(document.getElementById('price').value);
+    const dolasanArz = parseFloat(document.getElementById('circulating').value);
+    const maksArz = parseFloat(document.getElementById('maxSupply').value);
+    const tvl = parseFloat(document.getElementById('tvl').value);
+
+    if (!tvl || tvl <= 0 || !fiyat || fiyat <= 0 || !dolasanArz || dolasanArz <= 0) {
+        alert("Lütfen tüm alanlara geçerli pozitif değerler girin!");
+        return;
+    }
+
+    const marketCap = fiyat * dolasanArz;
+    const fdv = fiyat * maksArz;
+    const oran = marketCap / tvl;
+
+    document.getElementById('resultsBox').style.display = 'block';
+    document.getElementById('resMarketCap').innerText = '$' + marketCap.toLocaleString('en-US', {maximumFractionDigits: 0});
+    document.getElementById('resFDV').innerText = '$' + fdv.toLocaleString('en-US', {maximumFractionDigits: 0});
+    document.getElementById('resRatio').innerText = oran.toFixed(2);
+
+    // İNDİKATÖR STRATEJİSİ (Alım Dip & Satım Tepe Seviyeleri)
+    // Örnek indikatör kuralı: Mcap/TVL oranının 0.3 olması harika bir DİP/ALIM, 1.2+ olması ise TEPE/SATIM bölgesidir.
+    const dipOrani = 0.3;
+    const tepeOrani = 1.2;
+
+    const hesaplananDipFiyat = (dipOrani * tvl) / dolasanArz;
+    const hesaplananTepeFiyat = (tepeOrani * tvl) / dolasanArz;
+
+    document.getElementById('targetDipPrice').innerText = '$' + hesaplananDipFiyat.toLocaleString('en-US', {maximumFractionDigits: 4});
+    document.getElementById('targetTepePrice').innerText = '$' + hesaplananTepeFiyat.toLocaleString('en-US', {maximumFractionDigits: 4});
+
+    // Durum ve Grafik Güncelleme Mantığı
+    const statusDiv = document.getElementById('statusMessage');
+    const bar = document.getElementById('indicatorBar');
+    statusDiv.className = "status-box"; 
+
+    // Çubuk yüzdesi hesaplama (Maksimum 1.5 oranını %100 kabul edelim)
+    let barYuzdesi = (oran / 1.5) * 100;
+    if (barYuzdesi > 100) barYuzdesi = 100;
+    if (barYuzdesi < 0) barYuzdesi = 0;
+    bar.style.width = barYuzdesi + '%';
+
+    if (oran < 0.4) {
+        statusDiv.innerText = "🚨 DİP BÖLGESİ / GÜÇLÜ ALIM 🟢";
+        statusDiv.classList.add('zone-dip');
+        bar.style.backgroundColor = '#28a745';
+    } else if (oran >= 0.4 && oran <= 0.8) {
+        statusDiv.innerText = "ADİL DEĞER / KADEMELİ TOPLAMA 🟡";
+        statusDiv.classList.add('zone-fair');
+        bar.style.backgroundColor = '#ffc107';
+    } else {
+        statusDiv.innerText = "🔥 TEPE BÖLGESİ / AŞIRI PAHALI (SATIM) 🔴";
+        statusDiv.classList.add('zone-tepe');
+        bar.style.backgroundColor = '#dc3545';
+    }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canlı Verili Spot Grid Bot Hesaplayıcı</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9; /* Sayfa arka planı ferah gri-beyaz */
+            color: #1e2329;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff; /* Bembeyaz temiz arka plan */
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); /* Yumuşak, modern gölge */
+            border: 1px solid #e2e8f0;
+            width: 100%;
+            max-width: 750px;
+        }
+        h2 { 
+            text-align: center; 
+            color: #c79d00; /* Şık gold başlık */
+            margin-top: 0; 
+            font-size: 26px; 
+            font-weight: 700;
+            margin-bottom: 25px;
+        }
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .input-box { display: flex; flex-direction: column; }
+        label { 
+            margin-bottom: 8px; 
+            font-size: 14px; 
+            color: #4a5568; 
+            font-weight: 600; 
+        }
+        input, select {
+            padding: 14px;
+            background-color: #f8fafc; /* Okunması kolay açık gri girdi alanı */
+            border: 2px solid #cbd5e1;
+            color: #1e2329;
+            border-radius: 8px;
+            font-size: 16px; /* Büyütülmüş font */
+            font-weight: 600;
+            outline: none;
+            transition: all 0.2s;
+        }
+        input:focus { 
+            border-color: #c79d00; 
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(199, 157, 0, 0.15);
+        }
+        button {
+            grid-column: span 2;
+            padding: 16px;
+            background-color: #c79d00; 
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px; /* Buton yazısı büyütüldü */
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+            box-shadow: 0 4px 12px rgba(199, 157, 0, 0.2);
+        }
+        button:hover { background-color: #b08a00; }
+        button:disabled { background-color: #cbd5e1; cursor: not-allowed; box-shadow: none; }
+        
+        .results {
+            margin-top: 30px;
+            border-top: 2px solid #e2e8f0;
+            padding-top: 25px;
+        }
+        h3 { color: #1e2329; font-size: 20px; margin-bottom: 15px; }
+        
+        .summary {
+            background-color: #f8fafc; 
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 5px solid #c79d00;
+            font-size: 16px; /* Özet alanı rakamları büyütüldü */
+            line-height: 1.7;
+            color: #334155;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .summary strong { color: #000; font-size: 17px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 14px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 15px; }
+        th { background-color: #f1f5f9; color: #475569; font-weight: 700; font-size: 14px; }
+        
+        /* Tablo satır içi netlik ayarları */
+        td strong { font-size: 16px; } /* Rakamlar iri ve okunaklı */
+        
+        .row-sat { color: #df2938; background-color: rgba(223, 41, 56, 0.04); }
+        .row-al { color: #00b464; background-color: rgba(0, 180, 100, 0.04); }
+        .row-notr { color: #1e2329; background-color: #f1f5f9; font-weight: bold; }
+        
+        .loading { text-align: center; color: #c79d00; font-weight: bold; font-size: 16px; padding: 15px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🤖 YAVUZ TAŞPINAR AL SAT HESAP PLANLAMA (TRY Paritesi)</h2>
+    
+    <div class="input-group">
+        <div class="input-box">
+            <label>Coin Kodu (Örn: JTO, BTC, ETH, SOL)</label>
+            <input type="text" id="coinSymbol" value="JTO" style="text-transform: uppercase;">
+        </div>
+        <div class="input-box">
+            <label>Maksimum Düşüş/Yükseliş Aralığı (%)</label>
+            <input type="number" id="percentRange" value="10">
+        </div>
+        <div class="input-box">
+            <label>Toplam Bütçe (TL)</label>
+            <input type="number" id="totalBudget" value="300000">
+        </div>
+        <div class="input-box">
+            <label>Kademe Başına Tutar (TL)</label>
+            <input type="number" id="stepAmount" value="40000">
+        </div>
+        <button id="calcBtn" onclick="fetchLivePrices()">Canlı Fiyatı Çek ve Botu Tasarla</button>
+    </div>
+
+    <div id="loadingText" class="loading">⏳ Canlı borsadan fiyatlar ve USDT/TRY kuru alınıyor...</div>
+
+    <div class="results" id="resultsArea" style="display:none;">
+        <div class="summary" id="summaryBox"></div>
+        
+        <h3>📋 Tahtaya Dizilecek Canlı Bot Emirleri</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Kademe</th>
+                    <th>Fiyat Seviyesi (TL)</th>
+                    <th>Yapılacak İşlem (Bota Verilecek Talimat)</th>
+                    <th>İşlem Tutarı (TL)</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+async function fetchLivePrices() {
+    const coinInput = document.getElementById('coinSymbol').value.toUpperCase().trim();
+    const loadingText = document.getElementById('loadingText');
+    const resultsArea = document.getElementById('resultsArea');
+    const calcBtn = document.getElementById('calcBtn');
+
+    if(!coinInput) { alert("Lütfen geçerli bir coin kodu girin!"); return; }
+
+    loadingText.style.display = 'block';
+    resultsArea.style.display = 'none';
+    calcBtn.disabled = true;
+
+    try {
+        // 1. Adım: Seçilen coinin USDT fiyatını çek
+        const coinResponse = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${coinInput}USDT`);
+        if(!coinResponse.ok) throw new Error("Coin kodu bulunamadı veya Binance API hatası!");
+        const coinData = await coinResponse.json();
+        const priceInUSDT = parseFloat(coinData.price);
+
+        // 2. Adım: Canlı USDT/TRY dolar kurunu çek
+        const tryResponse = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=USDTTRY`);
+        const tryData = await tryResponse.json();
+        const usdtToTry = parseFloat(tryData.price);
+
+        // 3. Adım: Coinin anlık TL değerini hesapla
+        const currentPriceTRY = priceInUSDT * usdtToTry;
+
+        // Hesaplama fonksiyonunu tetikle
+        generateGridTable(currentPriceTRY, usdtToTry, coinInput);
+
+    } catch (error) {
+        alert("Hata oluştu: " + error.message + "\nLütfen coin kodunu (Örn: JTO) doğru yazdığınızdan emin olun.");
+    } finally {
+        loadingText.style.display = 'none';
+        calcBtn.disabled = false;
+    }
+}
+
+function generateGridTable(currentPrice, usdtToTry, coinSymbol) {
+    const totalBudget = parseFloat(document.getElementById('totalBudget').value);
+    const stepAmount = parseFloat(document.getElementById('stepAmount').value);
+    const percentRange = parseFloat(document.getElementById('percentRange').value) / 100;
+
+    const totalGrids = Math.floor(totalBudget / stepAmount);
+    const minPrice = currentPrice * (1 - percentRange);
+    const maxPrice = currentPrice * (1 + percentRange);
+    
+    const priceRangeTotal = maxPrice - minPrice;
+    const priceStep = priceRangeTotal / (totalGrids - 1);
+
+    // Özet Alanı
+    document.getElementById('summaryBox').innerHTML = `
+        <span style="color: #00b464; font-weight: bold; font-size: 18px;">🟢 CANLI VERİ BAĞLANTISI BAŞARILI:</span><br><br>
+        • <strong>Anlık Güncel Kur:</strong> 1 USDT = <strong>${usdtToTry.toFixed(2)} TL</strong><br>
+        • <strong>${coinSymbol} Canlı TL Fiyatı:</strong> <span style="font-size: 18px; color: #c79d00;"><strong>${currentPrice.toFixed(2)} TL</strong></span><br>
+        • <strong>Strateji:</strong> Toplam bütçe ile <strong>${totalGrids} adet</strong> ${stepAmount.toLocaleString('tr-TR')} TL'lik emir bloku oluşturuldu.<br>
+        • <strong>Alt Limit (Taban):</strong> ${minPrice.toFixed(2)} TL | <strong>Üst Limit (Tavan):</strong> ${maxPrice.toFixed(2)} TL<br>
+        • Her kademe arası fiyat adımı: <strong>${priceStep.toFixed(2)} TL (%${((priceStep/currentPrice)*100).toFixed(2)})</strong>
+    `;
+
+    // Tablo Oluşturma
+    let tableHTML = '';
+    for (let i = totalGrids - 1; i >= 0; i--) {
+        let gridPrice = minPrice + (priceStep * i);
+        let action = '';
+        let rowClass = '';
+
+        if (gridPrice > currentPrice * 1.002) {
+            action = `📈 SATIŞ emri yerleştir (Bu fiyata gelirse ${stepAmount.toLocaleString('tr-TR')} TL'lik sat)`;
+            rowClass = 'row-sat';
+        } else if (gridPrice < currentPrice * 0.998) {
+            action = `📉 ALIŞ emri yerleştir (Bu fiyata düşerse ${stepAmount.toLocaleString('tr-TR')} TL'lik al)`;
+            rowClass = 'row-al';
+        } else {
+            action = `🎯 ANLIK BAŞLANGIÇ FİYATI (Nötr İstasyon)`;
+            rowClass = 'row-notr';
+            gridPrice = currentPrice;
+        }
+
+        tableHTML += `
+            <tr class="${rowClass}">
+                <td><strong>Kademe ${i + 1}</strong></td>
+                <td><strong>${gridPrice.toFixed(2)} TL</strong></td>
+                <td>${action}</td>
+                <td><strong>${stepAmount.toLocaleString('tr-TR')} TL</strong></td>
+            </tr>
+        `;
+    }
+
+    document.getElementById('tableBody').innerHTML = tableHTML;
+    document.getElementById('resultsArea').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
