@@ -6,23 +6,18 @@
     <title>21+ İndikatörlü Gelişmiş Kripto Analiz Motoru (LuxAlgo Destek/Direnç Destekli)</title>
     <style>
         :root {
-            color-scheme: light; /* Tarayıcının karanlık modunu bu sayfa için devre dışı bırakır */
-            --bg: #ffffff; 
-            --card: #ffffff; 
-            --text: #0f172a; 
-            --subtext: #475569; 
+            color-scheme: light;
+            --bg: #e0f2fe; /* Soft (Açık) Mavi Arka Plan */
+            --card: #ffffff; /* Paneller temiz beyaz */
+            --text: #0f172a; /* Net okunabilir derin koyu lacivert yazı */
+            --border: #0f172a; /* Silikliği önlemek için TÜM ÇİZGİLER KOYU LACİVERT */
             --green: #0b9b62;
             --red: #c53044;
-            --border: #cbd5e1; 
         }
         
-        /* Tüm elementlerin arka planını beyaz olmaya zorluyoruz */
-        html, body, div, table, tr, td, th, input, select {
-            background-color: #ffffff !important;
-            color: #0f172a !important;
-        }
-
-        body {
+        html, body {
+            background-color: var(--bg) !important;
+            color: var(--text) !important;
             font-family: 'Segoe UI', system-ui, sans-serif;
             padding: 20px;
             margin: 0;
@@ -30,72 +25,95 @@
             flex-direction: column;
             align-items: center;
         }
+
         .container {
             width: 100%;
             max-width: 1200px;
-            border: 2px solid var(--border) !important;
+            background-color: var(--card) !important;
+            border: 3px solid var(--border) !important; /* Kalın ve net dış çerçeve */
             border-radius: 12px;
             padding: 25px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
         }
-        h2 { text-align: center; margin-top: 0; font-weight: 700; }
+
+        h2 { text-align: center; margin-top: 0; font-weight: 800; color: var(--text) !important; }
+
         .control-panel {
             display: flex;
             gap: 15px;
+            background-color: #f0f9ff !important; /* Panel içi hafif mavi tonu */
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
             flex-wrap: wrap;
             align-items: flex-end;
-            border: 2px solid var(--border) !important;
+            border: 2px solid var(--border) !important; /* Çok net çizgiler */
         }
+
         .input-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 150px; }
-        label { font-size: 13px; font-weight: bold; color: #0f172a !important; }
-        input, select, button {
+        label { font-size: 14px; font-weight: bold; color: var(--text) !important; }
+        
+        input, select {
             padding: 12px;
-            border: 2px solid var(--border) !important; 
+            background-color: #ffffff !important;
+            border: 2px solid var(--border) !important; /* Belirgin input çizgileri */
+            color: var(--text) !important;
             border-radius: 6px;
             font-size: 14px;
             outline: none;
-            font-weight: 500;
+            font-weight: 600;
         }
-        input:focus, select:focus { border-color: #0284c7 !important; }
         
-        /* Buton Siyah Olmasın Diye Mavi Tonuna Çekildi */
         button {
+            padding: 12px;
             background-color: #0284c7 !important; 
             color: #ffffff !important;
             font-weight: bold;
             cursor: pointer;
+            border: 2px solid var(--border) !important; /* Buton çizgisi belirgin */
+            border-radius: 6px;
+            font-size: 14px;
             transition: all 0.2s;
-            border: none !important;
         }
         button:hover { background-color: #0369a1 !important; }
         
         .summary-box {
             display: flex;
             justify-content: space-between;
+            background-color: #f0f9ff !important;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
             border: 2px solid var(--border) !important;
-            border-left: 6px solid #0284c7 !important;
+            border-left: 8px solid #0284c7 !important;
         }
+
         .signal-badge {
             padding: 6px 15px;
             border-radius: 4px;
             font-weight: bold;
             font-size: 18px;
+            border: 2px solid var(--border) !important;
         }
-        /* Sinyallerin arka planını görünürlük için hafif tuttuk ama yazıları çok net */
-        .sig-AL { background-color: #e6f4ea !important; color: var(--green) !important; border: 2px solid var(--green) !important; }
-        .sig-SAT { background-color: #fce8e6 !important; color: var(--red) !important; border: 2px solid var(--red) !important; }
-        .sig-NÖTR { background-color: #f1f5f9 !important; color: #475569 !important; border: 2px solid #64748b !important; }
+        
+        .sig-AL { background-color: #34d399 !important; color: #064e3b !important; }
+        .sig-SAT { background-color: #f87171 !important; color: #7f1d1d !important; }
+        .sig-NÖTR { background-color: #cbd5e1 !important; color: #1e293b !important; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 14px 12px; text-align: left; border-bottom: 2px solid var(--border) !important; }
-        th { font-weight: 700; border-bottom: 3px solid #0f172a !important; }
-        .status { font-weight: bold; }
+        th, td { 
+            padding: 14px 12px; 
+            text-align: left; 
+            border-bottom: 2px solid var(--border) !important; /* Tablo satır çizgileri çok net */
+            color: var(--text) !important;
+        }
+        th { 
+            background-color: #e0f2fe !important; 
+            font-weight: bold; 
+            border-bottom: 4px solid var(--border) !important; 
+        }
+        td strong { color: var(--text) !important; }
+        .status { font-weight: 900; padding: 2px 6px; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -122,11 +140,11 @@
     <div id="resultArea" style="display: none;">
         <div class="summary-box" id="summaryBox">
             <div>
-                <h3 style="margin: 0; font-size: 22px;" id="targetTitle">BTC/USDT</h3>
-                <p style="margin: 5px 0 0 0; font-weight: 600; font-size: 16px;" id="priceInfo">Fiyat: $0.00</p>
+                <h3 style="margin: 0; font-size: 22px; color: var(--text) !important;" id="targetTitle">BTC/USDT</h3>
+                <p style="margin: 5px 0 0 0; font-weight: 700; font-size: 16px; color: var(--text) !important;" id="priceInfo">Fiyat: $0.00</p>
             </div>
             <div style="display: flex; align-items: center; gap: 15px;">
-                <span id="scoreText" style="font-weight: bold; font-size: 16px;">Boğa (AL): 0 | Ayı (SAT): 0</span>
+                <span id="scoreText" style="font-weight: bold; font-size: 16px; color: var(--text) !important;">Boğa (AL): 0 | Ayı (SAT): 0</span>
                 <span id="mainSignal" class="signal-badge">NÖTR</span>
             </div>
         </div>
@@ -144,7 +162,7 @@
         </table>
     </div>
     
-    <div id="infoMessage" style="text-align: center; font-weight: 600; margin-top: 20px;">
+    <div id="infoMessage" style="text-align: center; font-weight: bold; margin-top: 20px; color: var(--text) !important;">
         Coin sembolünü girip "Analiz Et" butonuna basın.
     </div>
 </div>
@@ -236,7 +254,7 @@
             let indicators = [];
             let buySignals = 0, sellSignals = 0;
 
-            // 1. RSI (14)
+            // İndikatör Hesaplamaları Başlangıcı
             let gains = [], losses = [];
             for (let i = 1; i < closes.length; i++) {
                 let diff = closes[i] - closes[i-1];
@@ -248,50 +266,42 @@
             let rsi = rsiL === 0 ? 100 : 100 - (100 / (1 + (rsiG / rsiL)));
             indicators.push({ name: "RSI (14)", val: rsi.toFixed(2), sig: rsi < 30 ? "AL" : rsi > 70 ? "SAT" : "NÖTR" });
 
-            // 2-3-4-5. HAREKETLİ ORTALAMALAR
             let ema9 = EMA(closes, 9)[len], ema21 = EMA(closes, 21)[len], sma50 = SMA(closes, 50)[len], sma200 = SMA(closes, 200)[len];
             indicators.push({ name: "EMA 9", val: ema9.toFixed(2), sig: currentPrice > ema9 ? "AL" : "SAT" });
             indicators.push({ name: "EMA 21", val: ema21.toFixed(2), sig: currentPrice > ema21 ? "AL" : "SAT" });
             indicators.push({ name: "SMA 50", val: sma50.toFixed(2), sig: currentPrice > sma50 ? "AL" : "SAT" });
             indicators.push({ name: "SMA 200 (Ana Trend)", val: sma200.toFixed(2), sig: currentPrice > sma200 ? "AL" : "SAT" });
 
-            // 6. MACD
             let e12 = EMA(closes, 12), e26 = EMA(closes, 26);
             let macdLine = e12.map((v, i) => v - e26[i]);
             let signalLine = EMA(macdLine, 9);
             let mLine = macdLine[len], sLine = signalLine[len];
             indicators.push({ name: "MACD", val: `M: ${mLine.toFixed(3)} / S: ${sLine.toFixed(3)}`, sig: mLine > sLine ? "AL" : "SAT" });
 
-            // 7. Bollinger Bands
             let sma20 = SMA(closes, 20);
             let sdev = StdDev(closes, 20, sma20);
             let upperBB = sma20[len] + (sdev[len] * 2), lowerBB = sma20[len] - (sdev[len] * 2);
             indicators.push({ name: "Bollinger Bands (20,2)", val: `Üst: ${upperBB.toFixed(2)} / Alt: ${lowerBB.toFixed(2)}`, sig: currentPrice < lowerBB ? "AL" : currentPrice > upperBB ? "SAT" : "NÖTR" });
 
-            // 8. Stochastic Oscillator
             let low14 = lows.map((_,i) => i < 13 ? 0 : Math.min(...lows.slice(i-13, i+1)));
             let high14 = highs.map((_,i) => i < 13 ? 0 : Math.max(...highs.slice(i-13, i+1)));
             let divStoch = high14[len] - low14[len];
             let fastK = divStoch === 0 ? 50 : ((currentPrice - low14[len]) / divStoch) * 100;
             indicators.push({ name: "Stochastic %K", val: fastK.toFixed(2), sig: fastK < 20 ? "AL" : fastK > 80 ? "SAT" : "NÖTR" });
 
-            // 9. ATR (Volatilite)
             let tr = highs.map((h, i) => i === 0 ? h - lows[0] : Math.max(h - lows[i], Math.abs(h - closes[i-1]), Math.abs(lows[i] - closes[i-1])));
             let atr = SMA(tr, 14)[len];
             indicators.push({ name: "ATR (14)", val: atr.toFixed(4), sig: "NÖTR" });
 
-            // 10. CCI (14)
             let tp = closes.map((c,i) => (c + highs[i] + lows[i]) / 3);
             let smaTp = SMA(tp, 14);
             let cciMD = tp.map((_,i) => i < 13 ? 1 : tp.slice(i-13, i+1).reduce((a,b) => a + Math.abs(b - smaTp[i]), 0) / 14);
             let cci = cciMD[len] === 0 ? 0 : (tp[len] - smaTp[len]) / (0.015 * cciMD[len]);
             indicators.push({ name: "CCI (14)", val: cci.toFixed(2), sig: cci < -100 ? "AL" : cci > 100 ? "SAT" : "NÖTR" });
 
-            // 11. Williams %R
             let williamsR = divStoch === 0 ? -50 : ((high14[len] - currentPrice) / divStoch) * -100;
             indicators.push({ name: "Williams %R", val: williamsR.toFixed(2), sig: williamsR < -80 ? "AL" : williamsR > -20 ? "SAT" : "NÖTR" });
 
-            // 12. MFI (Money Flow Index)
             let rRawMf = tp.map((v, i) => v * volumes[i]), posMf = 0, negMf = 0;
             let startMfi = Math.max(0, len - 14);
             for(let i = startMfi + 1; i <= len; i++) {
@@ -300,37 +310,29 @@
             let mfi = negMf === 0 ? 100 : 100 - (100 / (1 + (posMf / negMf)));
             indicators.push({ name: "MFI (14)", val: mfi.toFixed(2), sig: mfi < 20 ? "AL" : mfi > 80 ? "SAT" : "NÖTR" });
 
-            // 13. Rate of Change (ROC)
             let rocBase = closes[Math.max(0, len - 9)];
             let roc = rocBase === 0 ? 0 : ((currentPrice - rocBase) / rocBase) * 100;
             indicators.push({ name: "ROC (9)", val: roc.toFixed(2) + "%", sig: roc > 0 ? "AL" : "SAT" });
 
-            // 14. Bull/Bear Power (Elder Ray)
             let bullPower = highs[len] - e12[len];
             indicators.push({ name: "Elder Bull Power", val: bullPower.toFixed(4), sig: bullPower > 0 ? "AL" : "SAT" });
 
-            // 15. Hacim Trend Karşılaştırması
             let avgVol = SMA(volumes, 20)[len];
             indicators.push({ name: "Hacim Değişimi", val: avgVol === 0 ? "1.0x" : (volumes[len]/avgVol).toFixed(1) + "x", sig: volumes[len] > avgVol && currentPrice > opens[len] ? "AL" : "NÖTR" });
 
-            // 16. Keltner Channels
             let centerKC = EMA(closes, 20)[len];
             let upperKC = centerKC + (2 * atr), lowerKC = centerKC - (2 * atr);
             indicators.push({ name: "Keltner Upper/Lower", val: `Üst: ${upperKC.toFixed(2)}`, sig: currentPrice > upperKC ? "SAT" : currentPrice < lowerKC ? "AL" : "NÖTR" });
 
-            // 17. Ichimoku Cloud (Tenkan-sen / Kijun-sen)
             let tenkan = (Math.max(...highs.slice(Math.max(0, len-9), len+1)) + Math.min(...lows.slice(Math.max(0, len-9), len+1))) / 2;
             let kijun = (Math.max(...highs.slice(Math.max(0, len-26), len+1)) + Math.min(...lows.slice(Math.max(0, len-26), len+1))) / 2;
             indicators.push({ name: "Ichimoku T/K", val: `T: ${tenkan.toFixed(2)} / K: ${kijun.toFixed(2)}`, sig: tenkan > kijun ? "AL" : "SAT" });
 
-            // 18. Parabolic SAR Simülasyonu
             indicators.push({ name: "PSAR Yönü", val: currentPrice > ema21 ? "Yukarı" : "Aşağı", sig: currentPrice > ema21 ? "AL" : "SAT" });
 
-            // 19. Momentum (10)
             let mom = currentPrice - closes[Math.max(0, len-10)];
             indicators.push({ name: "Momentum (10)", val: mom.toFixed(2), sig: mom > 0 ? "AL" : "SAT" });
 
-            // 20. Chande Momentum Oscillator (CMO)
             let cmoSumH = 0, cmoSumL = 0;
             let startCmo = Math.max(1, len-14);
             for(let i = startCmo; i <= len; i++) {
@@ -341,7 +343,6 @@
             let cmo = cmoDiv === 0 ? 0 : ((cmoSumH - cmoSumL) / cmoDiv) * 100;
             indicators.push({ name: "Chande CMO", val: cmo.toFixed(2), sig: cmo < -50 ? "AL" : cmo > 50 ? "SAT" : "NÖTR" });
 
-            // 21. On-Balance Volume (OBV)
             let obvValues = [0];
             for (let i = 1; i < closes.length; i++) {
                 if (closes[i] > closes[i - 1]) obvValues.push(obvValues[i - 1] + volumes[i]);
@@ -355,9 +356,7 @@
             let formattedObv = Math.abs(currentObv) > 1000000 ? (currentObv / 1000000).toFixed(2) + "M" : (currentObv / 1000).toFixed(2) + "K";
             indicators.push({ name: "On-Balance Volume (OBV)", val: formattedObv, sig: obvSignal });
 
-            // 22 & 23 LUXALGO DESTEK & DİRENÇ ENTEGRASYONU
             let srData = calculateLuxSR(highs, lows, currentPrice, 10);
-            
             let supText = srData.supports.map(s => `$${formatPrice(s)}`).join(" | ") || "Bulunamadı";
             indicators.push({ name: "🛡️ Destek Seviyeleri (En Yakın 3)", val: supText, sig: "NÖTR" });
 
