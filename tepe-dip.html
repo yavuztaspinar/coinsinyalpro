@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Özgür Coin Girişli Dönüş Analiz Paneli</title>
+    <title>Özgür Coin Girişli Dönüş Analiz Paneli (USDT)</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f7fa;
-            color: #eaecef;
+            background-color: #ffffff; /* Beyaz Arka Plan */
+            color: #1e2329; /* Koyu Gri / Siyah Metin */
             margin: 0;
             padding: 20px;
         }
@@ -18,14 +18,15 @@
         }
         .header {
             text-align: center;
-            background: #1e2329;
+            background: #f8f9fa; /* Hafif Gri Arka Plan */
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
             border-bottom: 4px solid #f0b90b;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         .control-panel {
-            background: #181a20;
+            background: #f8f9fa;
             padding: 15px;
             border-radius: 8px;
             display: flex;
@@ -33,89 +34,103 @@
             gap: 15px;
             align-items: center;
             margin-bottom: 20px;
-            border: 1px solid #2b3139;
+            border: 1px solid #e6e8ea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         input[type="text"], select, button {
-            background: #2b3139;
-            color: white;
-            border: 1px solid #474f59;
+            background: #ffffff;
+            color: #1e2329;
+            border: 1px solid #ced4da;
             padding: 10px 15px;
             border-radius: 4px;
             font-size: 14px;
             font-weight: bold;
             text-transform: uppercase;
+            outline: none;
         }
         input[type="text"] {
             width: 120px;
-            background: #14171e;
+            background: #ffffff;
             border: 1px solid #f0b90b;
             text-align: center;
         }
-        button { cursor: pointer; }
-        button:hover { background: #f0b90b; color: black; }
+        button { 
+            cursor: pointer; 
+            background: #f0b90b; 
+            color: #000; 
+            border: none;
+            transition: all 0.3s ease;
+        }
+        button:hover { background: #c79808; }
         
         .grid-stats {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 15px;
             margin-bottom: 20px;
         }
         .card {
-            background: #181a20;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid #2b3139;
-        }
-        .card h3 { margin: 0 0 10px 0; font-size: 13px; color: #848e9c; text-transform: uppercase; }
-        .card p { margin: 0; font-size: 22px; font-weight: bold; }
-        .text-green { color: #0ecb81; }
-        .text-red { color: #f6465d; }
-        .text-gold { color: #f0b90b; }
-        
-        .analysis-box {
-            background: #181a20;
+            background: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
-            border: 1px solid #2b3139;
+            text-align: center;
+            border: 1px solid #e6e8ea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .card h3 { margin: 0 0 10px 0; font-size: 13px; color: #5e6673; text-transform: uppercase; }
+        .card p { margin: 0; font-size: 24px; font-weight: bold; }
+        
+        /* Renk Tonları Aydınlık Moda Göre Ayarlandı */
+        .text-green { color: #03a66d; }
+        .text-red { color: #cf304a; }
+        .text-gold { color: #c79808; }
+        
+        .analysis-box {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e6e8ea;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
         .analysis-box h2 { 
             font-size: 16px; 
             margin-top: 0; 
-            color: #f0b90b; 
-            border-bottom: 1px solid #2b3139; 
+            color: #1e2329; 
+            border-bottom: 2px solid #f0b90b; 
             padding-bottom: 10px;
             display: flex;
             justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         .log-container {
-            max-height: 300px;
+            max-height: 400px;
             overflow-y: auto;
         }
         .log-line {
-            padding: 8px 10px;
-            border-bottom: 1px solid #1f2226;
+            padding: 12px 10px;
+            border-bottom: 1px solid #f0f2f5;
             font-size: 13px;
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
-        .time-badge { color: #848e9c; font-family: monospace; }
+        .log-line:hover { background: #f8f9fa; }
+        .time-badge { color: #707a8a; font-family: monospace; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h2>⏱️ YAVUZ TAŞPINAR COİN TEPE DİP BULMA PANELİ (TRY Pariteleri)</h2>
-        <p style="margin:5px 0 0 0; color:#848e9c; font-size:13px;">İstediğiniz coini elle girin; sistem tüm periyotlarda fiyatın dipten/tepeden dönüş sinyallerini tarasın.</p>
+        <h2>⏱️ YAVUZ TAŞPINAR COİN TEPE DİP BULMA PANELİ (USDT Pariteleri)</h2>
+        <p style="margin:5px 0 0 0; color:#5e6673; font-size:13px;">İstediğiniz coini elle girin; sistem tüm periyotlarda fiyatın dipten/tepeden dönüş sinyallerini tarasın.</p>
     </div>
 
-    <!-- Kontrol Paneli -->
     <div class="control-panel">
         <label style="font-weight: bold;">Coin Kodu:</label>
-        <!-- Elle giriş alanı -->
         <input type="text" id="coin-input" value="BTC" placeholder="Örn: ETH, SOL">
-        <span style="font-weight: bold; color: #848e9c; margin-left: -5px;">/ TRY</span>
+        <span style="font-weight: bold; color: #5e6673; margin-left: -5px;">/ USDT</span>
 
         <label style="font-weight: bold; margin-left: 15px;">Zaman Dilimi:</label>
         <select id="interval-select">
@@ -128,38 +143,38 @@
         </select>
 
         <button onclick="tumZamanlariAnalizEt()">🔍 Analiz Et ve Tara</button>
-        <span id="loading-text" style="color: #848e9c; font-size: 14px;"></span>
+        <span id="loading-text" style="color: #707a8a; font-size: 14px;"></span>
     </div>
 
-    <!-- Fiyat Kartları -->
     <div class="grid-stats">
         <div class="card">
             <h3>Canlı Spot Fiyatı</h3>
-            <p id="canli-fiyat" class="text-gold">- TL</p>
+            <p id="canli-fiyat" class="text-gold">- USDT</p>
         </div>
         <div class="card">
             <h3>Seçili Periyot En Tepe</h3>
-            <p id="tepe-donus" class="text-red">- TL</p>
+            <p id="tepe-donus" class="text-red">- USDT</p>
         </div>
         <div class="card">
             <h3>Seçili Periyot En Dip</h3>
-            <p id="dip-donus" class="text-green">- TL</p>
+            <p id="dip-donus" class="text-green">- USDT</p>
         </div>
     </div>
 
-    <!-- Analiz Çıktı Alanı -->
     <div class="analysis-box">
         <h2>
             <span>📊 Dönüş Analiz Raporu</span>
-            <span id="aktif-periyot-isim" style="font-size: 13px; color: #848e9c;"></span>
+            <span id="aktif-periyot-isim" style="font-size: 13px; color: #707a8a;"></span>
         </h2>
         <div class="log-container" id="analiz-raporu">
-            <div class="log-line" style="color:#848e9c;">Analizi başlatmak için coin kodunu girip butona tıklayın...</div>
+            <div class="log-line" style="color:#707a8a;">Analizi başlatmak için coin kodunu girip butona tıklayın...</div>
         </div>
     </div>
 </div>
 
 <script>
+let fiyattakipInterval = null;
+
 async function tumZamanlariAnalizEt() {
     const inputCoin = document.getElementById('coin-input').value.trim().toUpperCase();
     const interval = document.getElementById('interval-select').value;
@@ -170,64 +185,69 @@ async function tumZamanlariAnalizEt() {
         return;
     }
 
-    // Kullanıcının girdiğinin arkasına TRY paritesini bağlıyoruz
-    const coin = inputCoin + "TRY";
-    
+    const coin = inputCoin + "USDT";
     loadingText.innerText = `${coin} verileri taranıyor...`;
     document.getElementById('aktif-periyot-isim').innerText = `Aktif Parite: ${coin} | Periyot: ${interval.toUpperCase()}`;
 
+    if(fiyattakipInterval) clearInterval(fiyattakipInterval);
+
     try {
-        // 1. Canlı Fiyatı Çek
-        const tickerRes = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${coin}`);
-        if (!tickerRes.ok) throw new Error("Parite bulunamadı");
-        
-        const tickerData = await tickerRes.json();
-        const canliFiyat = parseFloat(tickerData.price);
-        document.getElementById('canli-fiyat').innerText = canliFiyat.toLocaleString('tr-TR') + " TL";
+        await canlifiyatGuncelle(coin);
+        fiyattakipInterval = setInterval(() => canlifiyatGuncelle(coin), 5000);
 
         let klines = [];
         
-        // 2. 45 Dakikalık Grafik Kontrolü (15m mum birleştirme)
         if (interval === '45m') {
             const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin}&interval=15m&limit=90`);
+            if (!res.ok) throw new Error("Veri çekilemedi");
             const veri15m = await res.json();
             klines = birlestir45Dakika(veri15m);
         } else {
-            // Normal Zaman Dilimleri İçin Direkt Çekim
-            const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin}&interval=${interval}&limit=30`);
+            const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin}&interval=${interval}&limit=35`);
+            if (!res.ok) throw new Error("Veri çekilemedi");
             klines = await res.json();
         }
 
-        // 3. Dönüşleri Hesapla ve Ekrana Bas
         analizCiktisiUret(klines);
         loadingText.innerText = "Tarama tamamlandı!";
     } catch (hata) {
         console.error(hata);
-        loadingText.innerText = "Hata! Girdiğiniz kodun Binance üzerinde TRY paritesi olduğundan emin olun.";
-        document.getElementById('canli-fiyat').innerText = "- TL";
-        document.getElementById('tepe-donus').innerText = "- TL";
-        document.getElementById('dip-donus').innerText = "- TL";
-        document.getElementById('analiz-raporu').innerHTML = "<div class='log-line' style='color:#f6465d;'>Hata: Parite geçersiz veya borsada TRY karşılığı yok.</div>";
+        if(fiyattakipInterval) clearInterval(fiyattakipInterval);
+        loadingText.innerText = "Hata oluştu!";
+        document.getElementById('canli-fiyat').innerText = "- USDT";
+        document.getElementById('tepe-donus').innerText = "- USDT";
+        document.getElementById('dip-donus').innerText = "- USDT";
+        document.getElementById('analiz-raporu').innerHTML = "<div class='log-line' style='color:#cf304a;'>Hata: Parite geçersiz veya Binance üzerinde USDT karşılığı yok.</div>";
     }
 }
 
-// 15 Dakikalık mumları 3'erli gruplayarak 45 dakikalık özel mum üreten motor
+async function canlifiyatGuncelle(coin) {
+    try {
+        const tickerRes = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${coin}`);
+        if(tickerRes.ok) {
+            const tickerData = await tickerRes.json();
+            const canliFiyat = parseFloat(tickerData.price);
+            document.getElementById('canli-fiyat').innerText = canliFiyat.toLocaleString('en-US') + " USDT";
+        }
+    } catch (e) {
+        console.log("Canlı fiyat güncellenemedi.");
+    }
+}
+
 function birlestir45Dakika(veri15m) {
     let birlesmisKlines = [];
-    for (let i = 0; i < veri15m.length; i += 3) {
-        if (i + 2 < veri15m.length) {
-            let mum1 = veri15m[i];
-            let mum2 = veri15m[i+1];
-            let mum3 = veri15m[i+2];
+    for (let i = 0; i < veri15m.length - 2; i += 3) {
+        let mum1 = veri15m[i];
+        let mum2 = veri15m[i+1];
+        let mum3 = veri15m[i+2];
 
-            let acilisZamani = mum1[0];
-            let acilis = parseFloat(mum1[1]);
-            let tepe = Math.max(parseFloat(mum1[2]), parseFloat(mum2[2]), parseFloat(mum3[2]));
-            let dip = Math.min(parseFloat(mum1[3]), parseFloat(mum2[3]), parseFloat(mum3[3]));
-            let kapanis = parseFloat(mum3[4]);
+        let acilisZamani = mum1[0];
+        let acilis = parseFloat(mum1[1]);
+        let tepe = Math.max(parseFloat(mum1[2]), parseFloat(mum2[2]), parseFloat(mum3[2]));
+        let dip = Math.min(parseFloat(mum1[3]), parseFloat(mum2[3]), parseFloat(mum3[3]));
+        let kapanis = parseFloat(mum3[4]);
 
-            birlesmisKlines.push([acilisZamani, acilis, tepe, dip, kapanis]);
-        }
+        birlesmisKlines.push([acilisZamani, acilis, tepe, dip, kapanis]);
     }
     return birlesmisKlines;
 }
@@ -237,7 +257,6 @@ function analizCiktisiUret(klines) {
     let enDusukDip = Infinity;
     let raporHtml = "";
 
-    // Mum verilerini analiz et (Geriye doğru sıralı)
     for (let i = klines.length - 1; i >= 0; i--) {
         const mum = klines[i];
         const zaman = new Date(mum[0]).toLocaleString('tr-TR', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
@@ -249,32 +268,30 @@ function analizCiktisiUret(klines) {
         if (tepe > enYuksekTepe) enYuksekTepe = tepe;
         if (dip < enDusukDip) enDusukDip = dip;
 
-        // Dönüş Hassasiyet Eşiği: Fitil boyunun muma oranı (%0.35'den büyük geri çekilmeler dönüş kabul edilir)
         let yukariFitilYuzdesi = ((tepe - Math.max(acilis, kapanis)) / tepe) * 100;
         let asağıFitilYuzdesi = ((Math.min(acilis, kapanis) - dip) / dip) * 100;
 
         if (yukariFitilYuzdesi > 0.35) {
             raporHtml += `
                 <div class="log-line">
-                    <span>🔴 Fiyat <b class="text-red">${tepe.toLocaleString('tr-TR')} TL</b> testinden sonra <b>AŞAĞI DÖNDÜ</b></span>
+                    <span>🔴 Fiyat <b class="text-red">${tepe.toLocaleString('en-US')} USDT</b> testinden sonra <b>AŞAĞI DÖNDÜ</b></span>
                     <span class="time-badge">${zaman}</span>
                 </div>`;
         }
         if (asağıFitilYuzdesi > 0.35) {
             raporHtml += `
                 <div class="log-line">
-                    <span>🟢 Fiyat <b class="text-green">${dip.toLocaleString('tr-TR')} TL</b> testinden sonra <b>YUKARI DÖNDÜ</b></span>
+                    <span>🟢 Fiyat <b class="text-green">${dip.toLocaleString('en-US')} USDT</b> testinden sonra <b>YUKARI DÖNDÜ</b></span>
                     <span class="time-badge">${zaman}</span>
                 </div>`;
         }
     }
 
-    document.getElementById('tepe-donus').innerText = enYuksekTepe.toLocaleString('tr-TR') + " TL";
-    document.getElementById('dip-donus').innerText = enDusukDip.toLocaleString('tr-TR') + " TL";
-    document.getElementById('analiz-raporu').innerHTML = raporHtml || "<div class='log-line'>Seçilen periyotta net dönüş fitili bulunamadı.</div>";
+    document.getElementById('tepe-donus').innerText = enYuksekTepe.toLocaleString('en-US') + " USDT";
+    document.getElementById('dip-donus').innerText = enDusukDip.toLocaleString('en-US') + " USDT";
+    document.getElementById('analiz-raporu').innerHTML = raporHtml || "<div class='log-line'>Seçilen periyotta %0.35 eşikli net dönüş fitili bulunamadı.</div>";
 }
 
-// İlk tetikleme (Varsayılan BTC açılır)
 tumZamanlariAnalizEt();
 </script>
 </body>
