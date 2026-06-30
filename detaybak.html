@@ -6,14 +6,14 @@
     <title>21+ İndikatörlü Gelişmiş Kripto Analiz Motoru (LuxAlgo Destek/Direnç Destekli)</title>
     <style>
         :root {
-            --bg: #0b0e11;
-            --card: #181a20;
-            --text: #eaecef;
-            --gold: #fcd535;
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --text: #212529;
+            --gold: #dfa100;
             --green: #0ecb81;
             --red: #f6465d;
             --blue: #2f80ed;
-            --border: #2b3139;
+            --border: #dee2e6;
         }
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
@@ -32,49 +32,50 @@
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 25px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
         h2 { text-align: center; color: var(--gold); margin-top: 0; }
         .control-panel {
             display: flex;
             gap: 15px;
-            background: #21262c;
+            background: #f1f3f5;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
             flex-wrap: wrap;
             align-items: flex-end;
+            border: 1px solid var(--border);
         }
         .input-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 150px; }
-        label { font-size: 12px; color: #848e9c; font-weight: bold; }
+        label { font-size: 12px; color: #495057; font-weight: bold; }
         input, select, button {
             padding: 12px;
-            background: #2b3139;
+            background: #ffffff;
             border: 1px solid var(--border);
-            color: #fff;
+            color: var(--text);
             border-radius: 6px;
             font-size: 14px;
             outline: none;
         }
-        input { background: #1e2226; }
-        input:focus { border-color: var(--gold); }
+        input { background: #ffffff; }
+        input:focus, select:focus { border-color: var(--gold); }
         button {
             background: var(--gold);
-            color: #000;
+            color: #fff;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.2s;
             border: none;
         }
-        button:hover { background: #f3ba2f; }
+        button:hover { background: #c68f00; }
         .summary-box {
             display: flex;
             justify-content: space-between;
-            background: #1e2226;
+            background: #f1f3f5;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
-            border-left: 5px solid var(--border);
+            border-left: 5px solid var(--gold);
         }
         .signal-badge {
             padding: 6px 15px;
@@ -82,12 +83,12 @@
             font-weight: bold;
             font-size: 18px;
         }
-        .sig-AL { background: rgba(14, 203, 129, 0.2); color: var(--green); border: 1px solid var(--green); }
-        .sig-SAT { background: rgba(246, 70, 93, 0.2); color: var(--red); border: 1px solid var(--red); }
-        .sig-NÖTR { background: rgba(132, 142, 156, 0.2); color: #848e9c; border: 1px solid #848e9c; }
+        .sig-AL { background: rgba(14, 203, 129, 0.15); color: #0b9b62; border: 1px solid var(--green); }
+        .sig-SAT { background: rgba(246, 70, 93, 0.15); color: #c53044; border: 1px solid var(--red); }
+        .sig-NÖTR { background: rgba(108, 117, 125, 0.15); color: #495057; border: 1px solid #6c757d; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
-        th { background: #2b3139; color: var(--gold); }
+        th { background: #e9ecef; color: var(--text); }
         .status { font-weight: bold; }
     </style>
 </head>
@@ -116,7 +117,7 @@
         <div class="summary-box" id="summaryBox">
             <div>
                 <h3 style="margin: 0;" id="targetTitle">BTC/USDT</h3>
-                <p style="margin: 5px 0 0 0; color: #848e9c;" id="priceInfo">Fiyat: $0.00</p>
+                <p style="margin: 5px 0 0 0; color: #495057;" id="priceInfo">Fiyat: $0.00</p>
             </div>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <span id="scoreText" style="font-weight: bold;">Skor: 0 / 21</span>
@@ -137,7 +138,7 @@
         </table>
     </div>
     
-    <div id="infoMessage" style="text-align: center; color: #848e9c; margin-top: 20px;">
+    <div id="infoMessage" style="text-align: center; color: #6c757d; margin-top: 20px;">
         Coin sembolünü girip "Analiz Et" butonuna basın.
     </div>
 </div>
@@ -168,9 +169,7 @@
         let supports = [];
         let resistances = [];
 
-        // Grafiği tarayarak salınım (pivot) noktalarını buluyoruz
         for (let i = length; i < highs.length - length; i++) {
-            // Pivot High Kontrolü (Direnç adayı)
             let isHigh = true;
             for (let j = i - length; j <= i + length; j++) {
                 if (highs[j] > highs[i]) { isHigh = false; break; }
@@ -179,7 +178,6 @@
                 resistances.push(highs[i]);
             }
 
-            // Pivot Low Kontrolü (Destek adayı)
             let isLow = true;
             for (let j = i - length; j <= i + length; j++) {
                 if (lows[j] < lows[i]) { isLow = false; break; }
@@ -189,10 +187,7 @@
             }
         }
 
-        // Mevcut fiyata göre filtrele ve sırala
-        // Dirençler: Fiyatın üstündeki en yakınlar
         let activeRes = resistances.filter(r => r > currentPrice).sort((a, b) => a - b).slice(0, 3);
-        // Destekler: Fiyatın altındaki en yakınlar
         let activeSup = supports.filter(s => s < currentPrice).sort((a, b) => b - a).slice(0, 3);
 
         return { supports: activeSup, resistances: activeRes };
@@ -375,9 +370,8 @@
                 if(ind.sig === "SAT") sellSignals++;
 
                 let tr = document.createElement("tr");
-                // Destek direnç satırlarına hafif arka plan rengi vererek belirginleştirelim
                 if(ind.name.includes("Destek") || ind.name.includes("Direnç")) {
-                    tr.style.background = "#1f252e";
+                    tr.style.background = "#f8f9fa";
                 }
 
                 tr.innerHTML = `
@@ -389,7 +383,6 @@
                 tbody.appendChild(tr);
             });
 
-            // Karar Algoritması
             let finalDecision = "NÖTR";
             if(buySignals > sellSignals + 2) finalDecision = "AL";
             else if(sellSignals > buySignals + 2) finalDecision = "SAT";
