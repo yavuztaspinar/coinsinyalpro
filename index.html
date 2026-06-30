@@ -22,13 +22,50 @@
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background-color: var(--bg);
             color: var(--text);
-            padding: 40px 20px;
+            padding: 20px 20px 40px 20px; /* Üst padding menü için düşürüldü */
             display: flex;
             flex-direction: column;
             align-items: center;
             margin: 0;
             -webkit-font-smoothing: antialiased;
         }
+
+        /* --- NAVİGASYON MENÜSÜ TASARIMI (YENİ) --- */
+        .navbar {
+            width: 100%;
+            max-width: 1600px;
+            background-color: #f8f9fa;
+            border: 2px solid var(--border);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            box-sizing: border-box;
+        }
+        .navbar a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 10px 18px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+        .navbar a:hover {
+            background-color: var(--gold-btn);
+            color: #000;
+        }
+        .navbar a.active {
+            background-color: var(--text);
+            color: #ffffff;
+        }
+        /* ---------------------------------------- */
+
         .scanner-box {
             width: 100%;
             max-width: 1600px;
@@ -37,6 +74,7 @@
             border-radius: 16px;
             padding: 35px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+            box-sizing: border-box;
         }
         h2 { 
             text-align: center; 
@@ -98,7 +136,6 @@
         }
         .bar-inner { width: 0%; height: 100%; background: var(--gold); transition: width 0.1s ease-out; }
         
-        /* Mobil Kayma ve Taşma Koruması İçin Eklenen Wrapper */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
@@ -123,6 +160,17 @@
     </style>
 </head>
 <body>
+
+<div class="navbar">
+    <a href="index.html" class="active">🏠 Ana Sayfa</a>
+    <a href="kilit-takvimi.html">📅 Kilit Takvimi</a>
+    <a href="kaldirac-analiz.html">📈 Kaldıraç Analiz</a>
+    <a href="tepe-dip.html">⏱️ Tepe Dip</a>
+    <a href="planlama.html">📝 Planlama</a>
+    <a href="kirilim.html">🎯 Kırılım</a>
+    <a href="gercekfiyat.html">💵 Gerçek Fiyat</a>
+    <a href="detaybak.html">🔍 Detay Bak</a>
+</div>
 
 <div class="scanner-box">
     <h2>🎯 BALİNASAVAR PRO // DİP UYUMSUZLUK AVCISI</h2>
@@ -438,7 +486,6 @@
             return { action: "RİSK", class: "trade-sell", confirmed: false, isCustomReason: true, reason: "KİLİT RİSKİ" };
         }
         
-        // Boşluk Hatası Düzeltildi
         const rsiDonusOnay = rsiPrev !== null && rsiNow > rsiPrev && (rsiPrev < (rsiLimit + 5)); 
         const macdConf = macdData && (macdData.macd > macdData.signal);
         const volConf = volData && volData.isSpike;
@@ -447,7 +494,7 @@
         const isDivergenceBuy = (divData && divData.isDiv);
         const isReversalBuy = rsiDonusOnay && macdConf;
         const isDipBuy = (rsiNow <= rsiLimit && dipData && dipData.isPureDip && rsiNow > rsiPrev);
-                              
+                                      
         if (isReversalBuy || isDipBuy || isDivergenceBuy) {
             let isFullyConfirmed = (macdConf && vwmaConf) || (isDivergenceBuy && (rsiNow > rsiPrev || volConf)) || (vwmaData && vwmaData.state.includes("🚀"));
             if (riskliArzListesi[coinSymbol] && !volConf) isFullyConfirmed = false; 
@@ -458,7 +505,7 @@
         const isOverboughtSell = (rsiNow >= 72 && rsiPrev !== null && rsiNow < rsiPrev);
         const isMacdBearishCross = (macdData && macdData.macd < macdData.signal && macdData.prevMacd >= macdData.prevSignal);
         const isDeathCrossState = crossData && crossData.isBearish;
-                        
+                                
         if (isOverboughtSell || (rsiNow > 60 && isMacdBearishCross) || (rsiNow > 65 && isDeathCrossState)) {
             return { action: "SAT", class: "trade-sell", confirmed: true };
         }
