@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>21+ İndikatörlü Gelişmiş Kripto Analiz Motoru (LuxAlgo Destek/Direnç Destekli)</title>
+    <style>
+        :root {
+            --bg: #0b0e11;
+            --card: #181a20;
+            --text: #eaecef;
+            --gold: #fcd535;
+            --green: #0ecb81;
+            --red: #f6465d;
+            --blue: #2f80ed;
+            --border: #2b3139;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 20px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+        h2 { text-align: center; color: var(--gold); margin-top: 0; }
+        .control-panel {
+            display: flex;
+            gap: 15px;
+            background: #21262c;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        .input-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 150px; }
+        label { font-size: 12px; color: #848e9c; font-weight: bold; }
+        input, select, button {
+            padding: 12px;
+            background: #2b3139;
+            border: 1px solid var(--border);
+            color: #fff;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+        input { background: #1e2226; }
+        input:focus { border-color: var(--gold); }
+        button {
+            background: var(--gold);
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        button:hover { background: #f3ba2f; }
+        .summary-box {
+            display: flex;
+            justify-content: space-between;
+            background: #1e2226;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--border);
+        }
+        .signal-badge {
+            padding: 6px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .sig-AL { background: rgba(14, 203, 129, 0.2); color: var(--green); border: 1px solid var(--green); }
+        .sig-SAT { background: rgba(246, 70, 93, 0.2); color: var(--red); border: 1px solid var(--red); }
+        .sig-NÖTR { background: rgba(132, 142, 156, 0.2); color: #848e9c; border: 1px solid #848e9c; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: #2b3139; color: var(--gold); }
+        .status { font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>📊 Gelişmiş Teknik Analiz Laboratuvarı & Lux Analiz</h2>
+    
+    <div class="control-panel">
+        <div class="input-group">
+            <label>Coin Sembolü (USDT Hariç)</label>
+            <input type="text" id="coinInput" placeholder="Örn: BTC, ETH, SOL" value="BTC">
+        </div>
+        <div class="input-group">
+            <label>Zaman Dilimi</label>
+            <select id="timeframe">
+                <option value="15m">15 Dakika</option>
+                <option value="1h" selected>1 Saat</option>
+                <option value="4h">4 Saat</option>
+                <option value="1d">1 Gün</option>
+            </select>
+        </div>
+        <button id="calcBtn" onclick="startAnalysis()" style="flex: 0.5; min-width: 120px;">Analiz Et</button>
+    </div>
+
+    <div id="resultArea" style="display: none;">
+        <div class="summary-box" id="summaryBox">
+            <div>
+                <h3 style="margin: 0;" id="targetTitle">BTC/USDT</h3>
+                <p style="margin: 5px 0 0 0; color: #848e9c;" id="priceInfo">Fiyat: $0.00</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span id="scoreText" style="font-weight: bold;">Skor: 0 / 21</span>
+                <span id="mainSignal" class="signal-badge">NÖTR</span>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>İndikatör Adı</th>
+                    <th>Mevcut Değer / Durum</th>
+                    <th>Ürettiği Sinyal</th>
+                </tr>
+            </thead>
+            <tbody id="indicatorRows"></tbody>
+        </table>
+    </div>
+    
+    <div id="infoMessage" style="text-align: center; color: #848e9c; margin-top: 20px;">
+        Coin sembolünü girip "Analiz Et" butonuna basın.
+    </div>
+</div>
+
+<script>
+    // GÜVENLİ VE KORUMALI MATEMATİKSEL FONKSİYONLAR
+    const SMA = (d, p) => d.map((_, i) => i < p - 1 ? 0 : d.slice(i - p + 1, i + 1).reduce((a, b) => a + b, 0) / p);
+    
+    const EMA = (d, p) => {
+        let k = 2 / (p + 1), ema = [];
+        if(d.length === 0) return [];
+        ema.push(d[0]);
+        for(let i = 1; i < d.length; i++) {
+            ema.push(d[i] * k + ema[i-1] * (1 - k));
+        }
+        return ema;
+    };
+
+    const StdDev = (d, p, smas) => d.map((_, i) => {
+        if (i < p - 1) return 0;
+        let avg = smas[i];
+        let sum = d.slice(i - p + 1, i + 1).reduce((a, b) => a + Math.pow(b - avg, 2), 0);
+        return Math.sqrt(sum / p);
+    });
+
+    // LUXALGO STİLİ PİVOT DESTEK VE DİRENÇ BULUCU ALGORİTMA
+    function calculateLuxSR(highs, lows, currentPrice, length = 10) {
+        let supports = [];
+        let resistances = [];
+
+        // Grafiği tarayarak salınım (pivot) noktalarını buluyoruz
+        for (let i = length; i < highs.length - length; i++) {
+            // Pivot High Kontrolü (Direnç adayı)
+            let isHigh = true;
+            for (let j = i - length; j <= i + length; j++) {
+                if (highs[j] > highs[i]) { isHigh = false; break; }
+            }
+            if (isHigh && !resistances.includes(highs[i])) {
+                resistances.push(highs[i]);
+            }
+
+            // Pivot Low Kontrolü (Destek adayı)
+            let isLow = true;
+            for (let j = i - length; j <= i + length; j++) {
+                if (lows[j] < lows[i]) { isLow = false; break; }
+            }
+            if (isLow && !supports.includes(lows[i])) {
+                supports.push(lows[i]);
+            }
+        }
+
+        // Mevcut fiyata göre filtrele ve sırala
+        // Dirençler: Fiyatın üstündeki en yakınlar
+        let activeRes = resistances.filter(r => r > currentPrice).sort((a, b) => a - b).slice(0, 3);
+        // Destekler: Fiyatın altındaki en yakınlar
+        let activeSup = supports.filter(s => s < currentPrice).sort((a, b) => b - a).slice(0, 3);
+
+        return { supports: activeSup, resistances: activeRes };
+    }
+
+    async function startAnalysis() {
+        const coin = document.getElementById("coinInput").value.trim().toUpperCase().replace("USDT", "");
+        const tf = document.getElementById("timeframe").value;
+        const btn = document.getElementById("calcBtn");
+        const info = document.getElementById("infoMessage");
+        const resArea = document.getElementById("resultArea");
+
+        if(!coin) return alert("Lütfen geçerli bir coin sembolü girin.");
+        
+        btn.disabled = true;
+        info.style.display = "block";
+        info.innerText = "⏳ Veriler çekiliyor ve indikatörler hesaplanıyor...";
+        resArea.style.display = "none";
+
+        try {
+            const response = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin}USDT&interval=${tf}&limit=500`);
+            if(!response.ok) throw new Error("Parite bulunamadı veya borsa hatası.");
+            const klines = await response.json();
+
+            if (!klines || klines.length < 200) {
+                throw new Error("Yetersiz geçmiş veri akışı. Lütfen başka bir periyot veya coin seçin.");
+            }
+
+            const closes = klines.map(k => parseFloat(k[4]));
+            const highs = klines.map(k => parseFloat(k[2]));
+            const lows = klines.map(k => parseFloat(k[3]));
+            const opens = klines.map(k => parseFloat(k[1]));
+            const volumes = klines.map(k => parseFloat(k[5]));
+            const len = closes.length - 1;
+
+            const currentPrice = closes[len];
+            const formatPrice = (p) => p < 1 ? p.toFixed(6) : p.toFixed(2);
+
+            document.getElementById("targetTitle").innerText = `${coin}/USDT`;
+            document.getElementById("priceInfo").innerText = `Fiyat: $${formatPrice(currentPrice)}`;
+
+            let indicators = [];
+            let buySignals = 0, sellSignals = 0;
+
+            // 1. RSI (14)
+            let gains = [], losses = [];
+            for (let i = 1; i < closes.length; i++) {
+                let diff = closes[i] - closes[i-1];
+                gains.push(diff > 0 ? diff : 0);
+                losses.push(diff < 0 ? Math.abs(diff) : 0);
+            }
+            let rsiG = gains.slice(0, 14).reduce((a,b)=>a+b,0)/14, rsiL = losses.slice(0, 14).reduce((a,b)=>a+b,0)/14;
+            for (let i = 14; i < gains.length; i++) { rsiG = (rsiG * 13 + gains[i]) / 14; rsiL = (rsiL * 13 + losses[i]) / 14; }
+            let rsi = rsiL === 0 ? 100 : 100 - (100 / (1 + (rsiG / rsiL)));
+            indicators.push({ name: "RSI (14)", val: rsi.toFixed(2), sig: rsi < 30 ? "AL" : rsi > 70 ? "SAT" : "NÖTR" });
+
+            // 2-3-4-5. HAREKETLİ ORTALAMALAR
+            let ema9 = EMA(closes, 9)[len], ema21 = EMA(closes, 21)[len], sma50 = SMA(closes, 50)[len], sma200 = SMA(closes, 200)[len];
+            indicators.push({ name: "EMA 9", val: ema9.toFixed(2), sig: currentPrice > ema9 ? "AL" : "SAT" });
+            indicators.push({ name: "EMA 21", val: ema21.toFixed(2), sig: currentPrice > ema21 ? "AL" : "SAT" });
+            indicators.push({ name: "SMA 50", val: sma50.toFixed(2), sig: currentPrice > sma50 ? "AL" : "SAT" });
+            indicators.push({ name: "SMA 200 (Ana Trend)", val: sma200.toFixed(2), sig: currentPrice > sma200 ? "AL" : "SAT" });
+
+            // 6. MACD
+            let e12 = EMA(closes, 12), e26 = EMA(closes, 26);
+            let macdLine = e12.map((v, i) => v - e26[i]);
+            let signalLine = EMA(macdLine, 9);
+            let mLine = macdLine[len], sLine = signalLine[len];
+            indicators.push({ name: "MACD", val: `M: ${mLine.toFixed(3)} / S: ${sLine.toFixed(3)}`, sig: mLine > sLine ? "AL" : "SAT" });
+
+            // 7. Bollinger Bands
+            let sma20 = SMA(closes, 20);
+            let sdev = StdDev(closes, 20, sma20);
+            let upperBB = sma20[len] + (sdev[len] * 2), lowerBB = sma20[len] - (sdev[len] * 2);
+            indicators.push({ name: "Bollinger Bands (20,2)", val: `Üst: ${upperBB.toFixed(2)} / Alt: ${lowerBB.toFixed(2)}`, sig: currentPrice < lowerBB ? "AL" : currentPrice > upperBB ? "SAT" : "NÖTR" });
+
+            // 8. Stochastic Oscillator
+            let low14 = lows.map((_,i) => i < 13 ? 0 : Math.min(...lows.slice(i-13, i+1)));
+            let high14 = highs.map((_,i) => i < 13 ? 0 : Math.max(...highs.slice(i-13, i+1)));
+            let divStoch = high14[len] - low14[len];
+            let fastK = divStoch === 0 ? 50 : ((currentPrice - low14[len]) / divStoch) * 100;
+            indicators.push({ name: "Stochastic %K", val: fastK.toFixed(2), sig: fastK < 20 ? "AL" : fastK > 80 ? "SAT" : "NÖTR" });
+
+            // 9. ATR (Volatilite)
+            let tr = highs.map((h, i) => i === 0 ? h - lows[0] : Math.max(h - lows[i], Math.abs(h - closes[i-1]), Math.abs(lows[i] - closes[i-1])));
+            let atr = SMA(tr, 14)[len];
+            indicators.push({ name: "ATR (14)", val: atr.toFixed(4), sig: "NÖTR" });
+
+            // 10. CCI (14)
+            let tp = closes.map((c,i) => (c + highs[i] + lows[i]) / 3);
+            let smaTp = SMA(tp, 14);
+            let cciMD = tp.map((_,i) => i < 13 ? 1 : tp.slice(i-13, i+1).reduce((a,b) => a + Math.abs(b - smaTp[i]), 0) / 14);
+            let cci = cciMD[len] === 0 ? 0 : (tp[len] - smaTp[len]) / (0.015 * cciMD[len]);
+            indicators.push({ name: "CCI (14)", val: cci.toFixed(2), sig: cci < -100 ? "AL" : cci > 100 ? "SAT" : "NÖTR" });
+
+            // 11. Williams %R
+            let williamsR = divStoch === 0 ? -50 : ((high14[len] - currentPrice) / divStoch) * -100;
+            indicators.push({ name: "Williams %R", val: williamsR.toFixed(2), sig: williamsR < -80 ? "AL" : williamsR > -20 ? "SAT" : "NÖTR" });
+
+            // 12. MFI (Money Flow Index)
+            let rRawMf = tp.map((v, i) => v * volumes[i]), posMf = 0, negMf = 0;
+            let startMfi = Math.max(0, len - 14);
+            for(let i = startMfi + 1; i <= len; i++) {
+                if(tp[i] > tp[i-1]) posMf += rRawMf[i]; else negMf += rRawMf[i];
+            }
+            let mfi = negMf === 0 ? 100 : 100 - (100 / (1 + (posMf / negMf)));
+            indicators.push({ name: "MFI (14)", val: mfi.toFixed(2), sig: mfi < 20 ? "AL" : mfi > 80 ? "SAT" : "NÖTR" });
+
+            // 13. Rate of Change (ROC)
+            let rocBase = closes[Math.max(0, len - 9)];
+            let roc = rocBase === 0 ? 0 : ((currentPrice - rocBase) / rocBase) * 100;
+            indicators.push({ name: "ROC (9)", val: roc.toFixed(2) + "%", sig: roc > 0 ? "AL" : "SAT" });
+
+            // 14. Bull/Bear Power (Elder Ray)
+            let bullPower = highs[len] - e12[len];
+            indicators.push({ name: "Elder Bull Power", val: bullPower.toFixed(4), sig: bullPower > 0 ? "AL" : "SAT" });
+
+            // 15. Hacim Trend Karşılaştırması
+            let avgVol = SMA(volumes, 20)[len];
+            indicators.push({ name: "Hacim Değişimi", val: avgVol === 0 ? "1.0x" : (volumes[len]/avgVol).toFixed(1) + "x", sig: volumes[len] > avgVol && currentPrice > opens[len] ? "AL" : "NÖTR" });
+
+            // 16. Keltner Channels
+            let centerKC = EMA(closes, 20)[len];
+            let upperKC = centerKC + (2 * atr), lowerKC = centerKC - (2 * atr);
+            indicators.push({ name: "Keltner Upper/Lower", val: `Üst: ${upperKC.toFixed(2)}`, sig: currentPrice > upperKC ? "SAT" : currentPrice < lowerKC ? "AL" : "NÖTR" });
+
+            // 17. Ichimoku Cloud (Tenkan-sen / Kijun-sen)
+            let tenkan = (Math.max(...highs.slice(Math.max(0, len-9), len+1)) + Math.min(...lows.slice(Math.max(0, len-9), len+1))) / 2;
+            let kijun = (Math.max(...highs.slice(Math.max(0, len-26), len+1)) + Math.min(...lows.slice(Math.max(0, len-26), len+1))) / 2;
+            indicators.push({ name: "Ichimoku T/K", val: `T: ${tenkan.toFixed(2)} / K: ${kijun.toFixed(2)}`, sig: tenkan > kijun ? "AL" : "SAT" });
+
+            // 18. Parabolic SAR Simülasyonu
+            indicators.push({ name: "PSAR Yönü", val: currentPrice > ema21 ? "Yukarı" : "Aşağı", sig: currentPrice > ema21 ? "AL" : "SAT" });
+
+            // 19. Momentum (10)
+            let mom = currentPrice - closes[Math.max(0, len-10)];
+            indicators.push({ name: "Momentum (10)", val: mom.toFixed(2), sig: mom > 0 ? "AL" : "SAT" });
+
+            // 20. Chande Momentum Oscillator (CMO)
+            let cmoSumH = 0, cmoSumL = 0;
+            let startCmo = Math.max(1, len-14);
+            for(let i = startCmo; i <= len; i++) {
+                let d = closes[i] - closes[i-1];
+                if(d > 0) cmoSumH += d; else cmoSumL += Math.abs(d);
+            }
+            let cmoDiv = cmoSumH + cmoSumL;
+            let cmo = cmoDiv === 0 ? 0 : ((cmoSumH - cmoSumL) / cmoDiv) * 100;
+            indicators.push({ name: "Chande CMO", val: cmo.toFixed(2), sig: cmo < -50 ? "AL" : cmo > 50 ? "SAT" : "NÖTR" });
+
+            // 21. On-Balance Volume (OBV)
+            let obvValues = [0];
+            for (let i = 1; i < closes.length; i++) {
+                if (closes[i] > closes[i - 1]) obvValues.push(obvValues[i - 1] + volumes[i]);
+                else if (closes[i] < closes[i - 1]) obvValues.push(obvValues[i - 1] - volumes[i]);
+                else obvValues.push(obvValues[i - 1]);
+            }
+            let obvLen = obvValues.length - 1;
+            let currentObv = obvValues[obvLen];
+            let obvSma5 = obvValues.slice(obvLen - 4, obvLen + 1).reduce((a, b) => a + b, 0) / 5;
+            let obvSignal = currentObv > obvSma5 ? "AL" : "SAT";
+            let formattedObv = Math.abs(currentObv) > 1000000 ? (currentObv / 1000000).toFixed(2) + "M" : (currentObv / 1000).toFixed(2) + "K";
+            indicators.push({ name: "On-Balance Volume (OBV)", val: formattedObv, sig: obvSignal });
+
+            // 22 & 23 LUXALGO DESTEK & DİRENÇ ENTEGRASYONU
+            let srData = calculateLuxSR(highs, lows, currentPrice, 10);
+            
+            let supText = srData.supports.map(s => `$${formatPrice(s)}`).join(" | ") || "Bulunamadı";
+            indicators.push({ name: "🛡️ Destek Seviyeleri (En Yakın 3)", val: supText, sig: "NÖTR" });
+
+            let resText = srData.resistances.map(r => `$${formatPrice(r)}`).join(" | ") || "Bulunamadı";
+            indicators.push({ name: "🎯 Direnç Seviyeleri (En Yakın 3)", val: resText, sig: "NÖTR" });
+
+
+            // DOM TABLO VE SKOR ÜRETİMİ
+            let tbody = document.getElementById("indicatorRows");
+            tbody.innerHTML = "";
+            
+            indicators.forEach((ind, index) => {
+                if(ind.sig === "AL") buySignals++;
+                if(ind.sig === "SAT") sellSignals++;
+
+                let tr = document.createElement("tr");
+                // Destek direnç satırlarına hafif arka plan rengi vererek belirginleştirelim
+                if(ind.name.includes("Destek") || ind.name.includes("Direnç")) {
+                    tr.style.background = "#1f252e";
+                }
+
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><strong>${ind.name}</strong></td>
+                    <td>${ind.val}</td>
+                    <td><span class="status sig-${ind.sig}">${ind.sig}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Karar Algoritması
+            let finalDecision = "NÖTR";
+            if(buySignals > sellSignals + 2) finalDecision = "AL";
+            else if(sellSignals > buySignals + 2) finalDecision = "SAT";
+
+            const mainBadge = document.getElementById("mainSignal");
+            mainBadge.innerText = finalDecision;
+            mainBadge.className = `signal-badge sig-${finalDecision}`;
+            
+            document.getElementById("scoreText").innerText = `Boğa (AL): ${buySignals} | Ayı (SAT): ${sellSignals}`;
+            
+            info.style.display = "none";
+            resArea.style.display = "block";
+
+        } catch(err) {
+            alert("Hata: " + err.message + "\nLütfen sembolü doğru yazdığınızdan emin olun (Örn: BTC, ETH, SOL).");
+            info.innerText = "Hata oluştu. Yeniden deneyin.";
+        } finally {
+            btn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>
