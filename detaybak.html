@@ -6,14 +6,13 @@
     <title>21+ İndikatörlü Gelişmiş Kripto Analiz Motoru (LuxAlgo Destek/Direnç Destekli)</title>
     <style>
         :root {
-            --bg: #f8f9fa;
-            --card: #ffffff;
-            --text: #212529;
-            --gold: #dfa100;
-            --green: #0ecb81;
-            --red: #f6465d;
-            --blue: #2f80ed;
-            --border: #dee2e6;
+            --bg: #ffffff; /* Arka plan tamamen saf beyaz */
+            --card: #ffffff; /* Paneller tamamen saf beyaz */
+            --text: #0f172a; /* Çok net okunabilir, derin koyu lacivert/siyah yazı */
+            --subtext: #475569; /* Yardımcı yazılar için okunaklı gri */
+            --green: #0b9b62;
+            --red: #c53044;
+            --border: #cbd5e1; /* Net görünen ama göz yormayan ince kenarlık */
         }
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
@@ -32,14 +31,14 @@
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 25px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
         }
-        h2 { text-align: center; color: var(--gold); margin-top: 0; }
+        h2 { text-align: center; color: var(--text); margin-top: 0; font-weight: 700; }
         .control-panel {
             display: flex;
             gap: 15px;
-            background: #f1f3f5;
-            padding: 15px;
+            background: var(--card); /* Tamamen beyaz */
+            padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
             flex-wrap: wrap;
@@ -47,35 +46,36 @@
             border: 1px solid var(--border);
         }
         .input-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 150px; }
-        label { font-size: 12px; color: #495057; font-weight: bold; }
+        label { font-size: 13px; color: var(--text); font-weight: bold; }
         input, select, button {
             padding: 12px;
             background: #ffffff;
-            border: 1px solid var(--border);
+            border: 2px solid var(--border); /* Kenarlıklar okumayı kolaylaştırmak için kalınlaştırıldı */
             color: var(--text);
             border-radius: 6px;
             font-size: 14px;
             outline: none;
+            font-weight: 500;
         }
-        input { background: #ffffff; }
-        input:focus, select:focus { border-color: var(--gold); }
+        input:focus, select:focus { border-color: #0f172a; }
         button {
-            background: var(--gold);
-            color: #fff;
+            background: #0f172a; /* Net görünen koyu buton */
+            color: #ffffff;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.2s;
             border: none;
         }
-        button:hover { background: #c68f00; }
+        button:hover { background: #1e293b; }
         .summary-box {
             display: flex;
             justify-content: space-between;
-            background: #f1f3f5;
+            background: var(--card); /* Tamamen beyaz */
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
-            border-left: 5px solid var(--gold);
+            border: 2px solid var(--border);
+            border-left: 6px solid #0f172a;
         }
         .signal-badge {
             padding: 6px 15px;
@@ -83,12 +83,13 @@
             font-weight: bold;
             font-size: 18px;
         }
-        .sig-AL { background: rgba(14, 203, 129, 0.15); color: #0b9b62; border: 1px solid var(--green); }
-        .sig-SAT { background: rgba(246, 70, 93, 0.15); color: #c53044; border: 1px solid var(--red); }
-        .sig-NÖTR { background: rgba(108, 117, 125, 0.15); color: #495057; border: 1px solid #6c757d; }
+        .sig-AL { background: rgba(14, 203, 129, 0.15); color: var(--green); border: 2px solid var(--green); }
+        .sig-SAT { background: rgba(246, 70, 93, 0.15); color: var(--red); border: 2px solid var(--red); }
+        .sig-NÖTR { background: rgba(148, 163, 184, 0.15); color: #334155; border: 2px solid #64748b; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
-        th { background: #e9ecef; color: var(--text); }
+        th, td { padding: 14px 12px; text-align: left; border-bottom: 2px solid var(--border); color: var(--text); }
+        th { background: #ffffff; color: var(--text); font-weight: 700; border-bottom: 3px solid #0f172a; }
+        td strong { color: var(--text); }
         .status { font-weight: bold; }
     </style>
 </head>
@@ -116,11 +117,11 @@
     <div id="resultArea" style="display: none;">
         <div class="summary-box" id="summaryBox">
             <div>
-                <h3 style="margin: 0;" id="targetTitle">BTC/USDT</h3>
-                <p style="margin: 5px 0 0 0; color: #495057;" id="priceInfo">Fiyat: $0.00</p>
+                <h3 style="margin: 0; font-size: 22px;" id="targetTitle">BTC/USDT</h3>
+                <p style="margin: 5px 0 0 0; color: var(--subtext); font-weight: 600; font-size: 16px;" id="priceInfo">Fiyat: $0.00</p>
             </div>
             <div style="display: flex; align-items: center; gap: 15px;">
-                <span id="scoreText" style="font-weight: bold;">Skor: 0 / 21</span>
+                <span id="scoreText" style="font-weight: bold; color: var(--text); font-size: 16px;">Boğa (AL): 0 | Ayı (SAT): 0</span>
                 <span id="mainSignal" class="signal-badge">NÖTR</span>
             </div>
         </div>
@@ -138,13 +139,12 @@
         </table>
     </div>
     
-    <div id="infoMessage" style="text-align: center; color: #6c757d; margin-top: 20px;">
+    <div id="infoMessage" style="text-align: center; color: var(--subtext); font-weight: 600; margin-top: 20px;">
         Coin sembolünü girip "Analiz Et" butonuna basın.
     </div>
 </div>
 
 <script>
-    // GÜVENLİ VE KORUMALI MATEMATİKSEL FONKSİYONLAR
     const SMA = (d, p) => d.map((_, i) => i < p - 1 ? 0 : d.slice(i - p + 1, i + 1).reduce((a, b) => a + b, 0) / p);
     
     const EMA = (d, p) => {
@@ -164,7 +164,6 @@
         return Math.sqrt(sum / p);
     });
 
-    // LUXALGO STİLİ PİVOT DESTEK VE DİRENÇ BULUCU ALGORİTMA
     function calculateLuxSR(highs, lows, currentPrice, length = 10) {
         let supports = [];
         let resistances = [];
@@ -360,8 +359,6 @@
             let resText = srData.resistances.map(r => `$${formatPrice(r)}`).join(" | ") || "Bulunamadı";
             indicators.push({ name: "🎯 Direnç Seviyeleri (En Yakın 3)", val: resText, sig: "NÖTR" });
 
-
-            // DOM TABLO VE SKOR ÜRETİMİ
             let tbody = document.getElementById("indicatorRows");
             tbody.innerHTML = "";
             
@@ -370,10 +367,7 @@
                 if(ind.sig === "SAT") sellSignals++;
 
                 let tr = document.createElement("tr");
-                if(ind.name.includes("Destek") || ind.name.includes("Direnç")) {
-                    tr.style.background = "#f8f9fa";
-                }
-
+                // Destek direnç satırları da saf beyaz kalacak şekilde güncellendi
                 tr.innerHTML = `
                     <td>${index + 1}</td>
                     <td><strong>${ind.name}</strong></td>
