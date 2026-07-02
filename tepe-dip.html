@@ -195,13 +195,13 @@
     <div class="nav-container">
         <a href="index.html" class="nav-logo">🎯 BALİNASAVAR PRO</a>
         <div class="nav-links" id="mainNavLinks">
-            <a href="index.html" class="nav-item">Dip Avcısı</a>
+            <a href="kilit-takvimi.html" class="nav-item active">Kilit Takvimi</a>
             <a href="tepe-dip.html" class="nav-item">Tepe-Dip Matrisi</a>
             <a href="kirilim.html" class="nav-item">Kırılım Avcısı</a>
             <a href="kaldirac-analiz.html" class="nav-item">Kaldıraç Analizi</a>
             <a href="gercekfiyat.html" class="nav-item">Gerçek Fiyat</a>
             <a href="pilanlama.html" class="nav-item">Planlama</a>
-            <a href="detaybak.html" class="nav-item">Detay Gör</a>
+            <a href="detaybak.html" class="nav-item">Detail Gör</a>
         </div>
     </div>
 </nav>
@@ -264,17 +264,28 @@
         if (currentPath === "" || currentPath === "index.html") {
             currentPath = "index.html";
         }
+        
+        // Eğer yerel dosyada çalışıyorsa veya url eşleşmiyorsa, manuel verdiğimiz active sınıfını koru
         const navLinks = document.querySelectorAll("#mainNavLinks .nav-item");
+        let hasActiveMatch = false;
+        
         navLinks.forEach(link => {
-            const linkPath = link.getAttribute("href");
-            if (currentPath === linkPath) {
-                link.classList.add("active");
-            } else {
-                link.classList.remove("active");
+            if (currentPath === link.getAttribute("href")) {
+                hasActiveMatch = true;
             }
         });
 
-        // Sayfa elementleri hafızaya tam otursun diye 100ms esneklik verip analizi tetikliyoruz
+        // Sadece URL'deki dosya adı menüdeki linklerden biriyle tam eşleşirse sınıfları güncelle
+        if (hasActiveMatch) {
+            navLinks.forEach(link => {
+                if (currentPath === link.getAttribute("href")) {
+                    link.classList.add("active");
+                } else {
+                    link.classList.remove("active");
+                }
+            });
+        }
+
         setTimeout(() => {
             tumZamanlariAnalizEt();
         }, 100); 
