@@ -5,32 +5,117 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Canlı Verili Spot Grid Bot Hesaplayıcı (USDT)</title>
     <style>
+        /* Açık Tema (Beyaz Arka Plan) Renk Paleti */
+        :root {
+            --bg: #ffffff;
+            --card: #f8f9fa;
+            --text: #1e2329;
+            --text-muted: #5e6673;
+            --gold: #f3ba2f;
+            --gold-hover: #b08b00;
+            --gold-btn: #fcd535;
+            --green: #0ecb81;
+            --red: #f6465d;
+            --border: #eaecef;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f6f9; 
-            color: #1e2329;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
             margin: 0;
-            padding: 20px;
+            padding: 0 0 40px 0; /* Üst padding navbar için sıfırlandı */
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
         }
+
+        /* --- Modern Nav Bar Tasarımı --- */
+        .main-navbar {
+            width: 100%;
+            background-color: #1e2329; /* Binance Koyu Gri */
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .nav-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+            padding: 0 20px;
+        }
+        .nav-logo {
+            color: #fcd535;
+            font-size: 20px;
+            font-weight: 800;
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 10px;
+            height: 100%;
+            align-items: center;
+        }
+        .nav-item {
+            color: #eaecef;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 600;
+            padding: 10px 18px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        .nav-item:hover {
+            color: #fcd535;
+            background-color: rgba(253, 213, 53, 0.1);
+        }
+        .nav-item.active {
+            color: #1e2329;
+            background-color: #fcd535;
+        }
+
+        @media (max-width: 992px) {
+            .nav-container {
+                flex-direction: column;
+                height: auto;
+                padding: 15px 10px;
+                gap: 15px;
+            }
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 5px;
+            }
+            .nav-item {
+                font-size: 13px;
+                padding: 8px 12px;
+            }
+        }
+        /* --- Nav Bar Bitiş --- */
+
         .container {
-            background-color: #ffffff; 
+            background-color: var(--card); 
             padding: 35px;
             border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
-            border: 1px solid #e2e8f0;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.06); 
+            border: 2px solid var(--border);
             width: 100%;
             max-width: 750px;
+            box-sizing: border-box;
         }
         h2 { 
             text-align: center; 
-            color: #c79d00; 
+            color: var(--text); 
             margin-top: 0; 
-            font-size: 26px; 
-            font-weight: 700;
+            font-size: 24px; 
+            font-weight: 800;
             margin-bottom: 25px;
         }
         .input-group {
@@ -43,77 +128,97 @@
         label { 
             margin-bottom: 8px; 
             font-size: 14px; 
-            color: #4a5568; 
-            font-weight: 600; 
+            color: #474d57; 
+            font-weight: 700; 
         }
         input, select {
-            padding: 14px;
-            background-color: #f8fafc; 
-            border: 2px solid #cbd5e1;
-            color: #1e2329;
+            padding: 12px;
+            background-color: #ffffff; 
+            border: 1px solid #cdc1c1;
+            color: var(--text);
             border-radius: 8px;
-            font-size: 16px; 
+            font-size: 15px; 
             font-weight: 600;
             outline: none;
             transition: all 0.2s;
         }
         input:focus { 
-            border-color: #c79d00; 
-            background-color: #fff;
-            box-shadow: 0 0 0 3px rgba(199, 157, 0, 0.15);
+            border-color: var(--gold); 
+            box-shadow: 0 0 0 2px rgba(243, 186, 47, 0.2);
         }
         button {
             grid-column: span 2;
-            padding: 16px;
-            background-color: #c79d00; 
-            color: #ffffff;
+            padding: 14px;
+            background-color: var(--gold-btn); 
+            color: #000;
             border: none;
             border-radius: 8px;
-            font-size: 18px; 
-            font-weight: bold;
+            font-size: 16px; 
+            font-weight: 700;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.2s ease;
             margin-top: 10px;
-            box-shadow: 0 4px 12px rgba(199, 157, 0, 0.2);
+            text-transform: uppercase;
         }
-        button:hover { background-color: #b08a00; }
-        button:disabled { background-color: #cbd5e1; cursor: not-allowed; box-shadow: none; }
+        button:hover { 
+            background-color: var(--gold);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(243, 186, 47, 0.3);
+        }
+        button:disabled { background-color: var(--border); color: var(--text-muted); cursor: not-allowed; box-shadow: none; transform: none; }
         
         .results {
             margin-top: 30px;
-            border-top: 2px solid #e2e8f0;
+            border-top: 2px solid var(--border);
             padding-top: 25px;
         }
-        h3 { color: #1e2329; font-size: 20px; margin-bottom: 15px; }
+        h3 { color: var(--text); font-size: 18px; margin-bottom: 15px; font-weight: 700; }
         
         .summary {
-            background-color: #f8fafc; 
+            background-color: #ffffff; 
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 25px;
-            border-left: 5px solid #c79d00;
-            font-size: 16px; 
+            border-left: 5px solid var(--gold);
+            border-top: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            font-size: 15px; 
             line-height: 1.7;
             color: #334155;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
         }
-        .summary strong { color: #000; font-size: 17px; }
+        .summary strong { color: var(--text); font-size: 16px; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 14px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 15px; }
-        th { background-color: #f1f5f9; color: #475569; font-weight: 700; font-size: 14px; }
+        th, td { padding: 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
+        th { background-color: #f1f3f5; color: #474d57; font-weight: 700; font-size: 13px; }
         
-        td strong { font-size: 16px; } 
+        td strong { font-size: 15px; } 
         
-        .row-sat { color: #df2938; background-color: rgba(223, 41, 56, 0.04); }
-        .row-al { color: #00b464; background-color: rgba(0, 180, 100, 0.04); }
-        .row-notr { color: #1e2329; background-color: #f1f5f9; font-weight: bold; }
+        .row-sat { color: var(--red); background-color: rgba(246, 70, 93, 0.05); }
+        .row-al { color: #00b464; background-color: rgba(14, 203, 129, 0.05); }
+        .row-notr { color: var(--text); background-color: #f1f3f5; font-weight: bold; }
         
-        .loading { text-align: center; color: #c79d00; font-weight: bold; font-size: 16px; padding: 15px; display: none; }
+        .loading { text-align: center; color: var(--gold-hover); font-weight: bold; font-size: 16px; padding: 15px; display: none; }
     </style>
 </head>
 <body>
 
+<nav class="main-navbar">
+    <div class="nav-container">
+        <a href="index.html" class="nav-logo">🎯 BALİNASAVAR PRO</a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-item">Dip Avcısı</a>
+            <a href="tepe-dip.html" class="nav-item">Tepe-Dip Matrisi</a>
+            <a href="kirilim.html" class="nav-item">Kırılım Avcısı</a>
+            <a href="kaldirac-analiz.html" class="nav-item">Kaldıraç Analizi</a>
+            <a href="gercekfiyat.html" class="nav-item">Gerçek Fiyat</a>
+            <a href="pilanlama.html" class="nav-item active">Planlama</a>
+            <a href="detaybak.html" class="nav-item">Detail Gör</a>
+        </div>
+    </div>
+</nav>
 <div class="container">
     <h2>🤖 YAVUZ TAŞPINAR AL SAT HESAP PLANLAMA (USDT Paritesi)</h2>
     
@@ -171,13 +276,11 @@ async function fetchLivePrices() {
     calcBtn.disabled = true;
 
     try {
-        // 1. Adım: Seçilen coinin USDT fiyatını çek
         const coinResponse = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${coinInput}USDT`);
         if(!coinResponse.ok) throw new Error("Coin kodu bulunamadı veya Binance API hatası!");
         const coinData = await coinResponse.json();
         const currentPriceUSDT = parseFloat(coinData.price);
 
-        // Hesaplama fonksiyonunu tetikle
         generateGridTable(currentPriceUSDT, coinInput);
 
     } catch (error) {
@@ -200,19 +303,16 @@ function generateGridTable(currentPrice, coinSymbol) {
     const priceRangeTotal = maxPrice - minPrice;
     const priceStep = priceRangeTotal / (totalGrids - 1);
 
-    // Ondalık hassasiyet ayarı (Bitcoin gibi yüksek fiyatlı veya JTO gibi düşük fiyatlı coinler için dinamik görünüm)
     const decimalPlaces = currentPrice > 100 ? 2 : 4;
 
-    // Özet Alanı
     document.getElementById('summaryBox').innerHTML = `
-        <span style="color: #00b464; font-weight: bold; font-size: 18px;">🟢 CANLI VERİ BAĞLANTISI BAŞARILI:</span><br><br>
-        • <strong>${coinSymbol} Canlı Fiyatı:</strong> <span style="font-size: 18px; color: #c79d00;"><strong>${currentPrice.toFixed(decimalPlaces)} USDT</strong></span><br>
+        <span style="color: #0ecb81; font-weight: bold; font-size: 16px;">🟢 CANLI VERİ BAĞLANTISI BAŞARILI:</span><br><br>
+        • <strong>${coinSymbol} Canlı Fiyatı:</strong> <span style="font-size: 16px; color: var(--gold-hover);"><strong>${currentPrice.toFixed(decimalPlaces)} USDT</strong></span><br>
         • <strong>Strateji:</strong> Toplam bütçe ile <strong>${totalGrids} adet</strong> ${stepAmount.toLocaleString('en-US')} USDT'lik emir bloku oluşturuldu.<br>
         • <strong>Alt Limit (Taban):</strong> ${minPrice.toFixed(decimalPlaces)} USDT | <strong>Üst Limit (Tavan):</strong> ${maxPrice.toFixed(decimalPlaces)} USDT<br>
         • Her kademe arası fiyat adımı: <strong>${priceStep.toFixed(decimalPlaces)} USDT (%${((priceStep/currentPrice)*100).toFixed(2)})</strong>
     `;
 
-    // Tablo Oluşturma
     let tableHTML = '';
     for (let i = totalGrids - 1; i >= 0; i--) {
         let gridPrice = minPrice + (priceStep * i);
