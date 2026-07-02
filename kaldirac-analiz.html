@@ -23,7 +23,7 @@
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
             background: var(--bg); 
             color: var(--text); 
-            padding: 0 0 40px 0; /* Üst padding navbar için sıfırlandı */
+            padding: 0 0 40px 0;
             display: flex; 
             flex-direction: column;
             align-items: center; 
@@ -49,6 +49,7 @@
             align-items: center;
             height: 70px;
             padding: 0 20px;
+            box-sizing: border-box;
         }
         .nav-logo {
             color: #fcd535;
@@ -136,12 +137,11 @@
 </head>
 <body>
 
-<!-- NAV BAR BAŞLANGICI -->
 <nav class="main-navbar">
     <div class="nav-container">
         <a href="index.html" class="nav-logo">🎯 BALİNASAVAR PRO</a>
-        <div class="nav-links">
-            <a href="index.html" class="nav-item">Dip Avcısı</a>
+        <div class="nav-links" id="mainNavLinks">
+            <a href="kilit-takvimi.html" class="nav-item">Kilit Takvimi</a>
             <a href="tepe-dip.html" class="nav-item">Tepe-Dip Matrisi</a>
             <a href="kirilim.html" class="nav-item">Kırılım Avcısı</a>
             <a href="kaldirac-analiz.html" class="nav-item active">Kaldıraç Analizi</a>
@@ -151,8 +151,6 @@
         </div>
     </div>
 </nav>
-<!-- NAV BAR BİTİŞİ -->
-
 <div class="container">
     <h2>📊 YAVUZ TAŞPINAR KALDIRAÇ ORANLARI</h2>
     <div class="subtitle">Hyperliquid Canlı Veri Analiz Motoru</div>
@@ -167,7 +165,6 @@
     <div id="resultArea" style="display:none;">
         <h3 id="targetTitle" style="text-align: center; color: #1e2329; font-weight: 700; margin-bottom: 20px;"></h3>
         
-        <!-- Canlı Long/Short Dağılım Barı -->
         <div style="text-align: center; margin-bottom: 5px; font-weight: 700; color: #474d57;">Tahmini Duyarlılık (Sentiment) Dengesi</div>
         <div class="ratio-bar-container">
             <div id="longBar" class="long-bar" style="width: 50%;">LONG %50</div>
@@ -185,7 +182,10 @@
 
 <script>
     async function startHyperliquidAnalysis() {
-        const coin = document.getElementById("coinInput").value.trim().toUpperCase();
+        const coinInput = document.getElementById("coinInput");
+        if (!coinInput) return;
+        
+        const coin = coinInput.value.trim().toUpperCase();
         const errorArea = document.getElementById("errorArea");
         const resultArea = document.getElementById("resultArea");
         
@@ -211,7 +211,7 @@
             const coinIndex = universe.findIndex(asset => asset.name === coin);
             
             if (coinIndex === -1) {
-                throw new Error(`${coin} Hyperliquid borsasında bulunamadı! Lütfen geçerli bir varlık girin (Örn: BTC, ETH, SOL, PURR).`);
+                throw new Error(`${coin} Hyperliquid borsasında bulunamadı! Lütfen geçerli bir varlık girin (Örn: BTC, ETH, SOL).`);
             }
 
             const ctx = assetCtxs[coinIndex];
@@ -304,8 +304,34 @@
         }
     }
 
-    // Sayfa açıldığında otomatik ilk analizi yap
-    window.onload = () => { startHyperliquidAnalysis(); };
+    // Sayfa güvenli şekilde açıldığında otomatik ilk analizi yapması için olay dinleyici
+    document.addEventListener("DOMContentLoaded", function() {
+        startHyperliquidAnalysis();
+        
+        // Navbar aktif sayfa boyama senkronizasyon kontrolü (Yerel Dosya Koruması)
+        let currentPath = window.location.pathname.split("/").pop();
+        if (currentPath === "" || currentPath === "index.html") {
+            currentPath = "index.html";
+        }
+        const navLinks = document.querySelectorAll("#mainNavLinks .nav-item");
+        let hasActiveMatch = false;
+        
+        navLinks.forEach(link => {
+            if (currentPath === link.getAttribute("href")) {
+                hasActiveMatch = true;
+            }
+        });
+
+        if (hasActiveMatch) {
+            navLinks.forEach(link => {
+                if (currentPath === link.getAttribute("href")) {
+                    link.classList.add("active");
+                } else {
+                    link.classList.remove("active");
+                }
+            });
+        }
+    });
 </script>
 </body>
 </html>
