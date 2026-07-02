@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Gelişmiş Kripto Analiz Motoru</title>
+    <style>
+        :root { --bg: #0b0e11; --card: #181a20; --text: #eaecef; --gold: #fcd535; --green: #0ecb81; --red: #f6465d; --border: #2b3139; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 1000px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+        h2 { text-align: center; color: var(--gold); }
+        .control-panel { display: flex; gap: 10px; margin-bottom: 20px; }
+        input, select, button { padding: 10px; background: #2b3139; border: 1px solid var(--border); color: #fff; border-radius: 4px; }
+        button { background: var(--gold); color: #000; font-weight: bold; cursor: pointer; border: none; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; border-bottom: 1px solid var(--border); text-align: left; }
+        .sig-AL { color: var(--green); } .sig-SAT { color: var(--red); } .sig-NÖTR { color: #848e9c; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>📊 YAVUZ TAŞPINAR KALDIRAÇ ORANLARI</h2>
+    <div class="control-panel">
+        <input type="text" id="coinInput" value="BTC" placeholder="Coin (Örn: BTC)">
+        <select id="timeframe"><option value="1h" selected>1 Saat</option><option value="4h">4 Saat</option><option value="1d">1 Gün</option></select>
+        <button onclick="startAnalysis()">Analiz Et</button>
+    </div>
+    <div id="resultArea" style="display:none;">
+        <h3 id="targetTitle"></h3>
+        <table><thead><tr><th>#</th><th>İndikatör</th><th>Değer</th><th>Sinyal</th></tr></thead><tbody id="indicatorRows"></tbody></table>
+    </div>
+</div>
+
+<script>
+    const SMA = (d, p) => d.map((_, i) => i < p - 1 ? 0 : d.slice(i - p + 1, i + 1).reduce((a, b) => a + b, 0) / p);
+    const EMA = (d, p) => { let k = 2/(p+1), ema = [d[0]]; for(let i=1; i<d.length; i++) ema.push(d[i]*k + ema[i-1]*(1-k)); return ema; };
+    const StdDev = (d, p, smas) => d.map((_, i) => i < p - 1 ? 0 : Math.sqrt(d.slice(i-p+1, i+1).reduce((a, b) => a + Math.pow(b - smas[i], 2), 0) / p));
+
+    async function startAnalysis() {
+        const coin = document.getElementById("coinInput").value.trim().toUpperCase();
+        const tf = document.getElementById("timeframe").value;
+        const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin}USDT&interval=${tf}&limit=500`);
+        const klines = await res.json();
+        const closes = klines.map(k => parseFloat(k[4])), highs = klines.map(k => parseFloat(k[2])), lows = klines.map(k => parseFloat(k[3]));
+        const len = closes.length - 1, current = closes[len];
+
+        // Temel İndikatörler (Örnek: RSI, BB)
+        let indicators = [];
+        const sma20 = SMA(closes, 20), sdev = StdDev(closes, 20, sma20);
+        indicators.push({ name: "RSI", val: "Hesaplanıyor", sig: "NÖTR" }); // Buraya 23 indikatör mantığını ekleyin
+        
+        // Likidite Motoru
+        const recentLow = Math.min(...lows.slice(len-20, len)), recentHigh = Math.max(...highs.slice(len-20, len));
+        const longRisk = ((current - recentLow) / recentLow) * 100;
+        const shortRisk = ((recentHigh - current) / current) * 100;
+
+        indicators.push({ name: "🔥 Long Tasfiye Riski", val: `Risk: ${Math.min(100, longRisk*2).toFixed(1)}%`, sig: longRisk < 10 ? "AL" : "NÖTR" });
+        indicators.push({ name: "⚠️ Short Sıkıştırma Riski", val: `Risk: ${Math.min(100, shortRisk*2).toFixed(1)}%`, sig: shortRisk < 10 ? "SAT" : "NÖTR" });
+
+        const tbody = document.getElementById("indicatorRows"); tbody.innerHTML = "";
+        indicators.forEach((ind, i) => {
+            tbody.innerHTML += `<tr><td>${i+1}</td><td>${ind.name}</td><td>${ind.val}</td><td class="sig-${ind.sig}">${ind.sig}</td></tr>`;
+        });
+        document.getElementById("resultArea").style.display = "block";
+        document.getElementById("targetTitle").innerText = `${coin}/USDT Analizi`;
+    }
+</script>
+</body>
+</html>
