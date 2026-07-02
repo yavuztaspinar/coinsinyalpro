@@ -168,9 +168,9 @@
     <div class="nav-container">
         <a href="index.html" class="nav-logo">🎯 BALİNASAVAR PRO</a>
         <div class="nav-links" id="mainNavLinks">
-            <a href="index.html" class="nav-item">Dip Avcısı</a>
+            <a href="kilit-takvimi.html" class="nav-item">Kilit Takvimi</a>
             <a href="tepe-dip.html" class="nav-item">Tepe-Dip Matrisi</a>
-            <a href="kirilim.html" class="nav-item">Kırılım Avcısı</a>
+            <a href="kirilim.html" class="nav-item active">Kırılım Avcısı</a>
             <a href="kaldirac-analiz.html" class="nav-item">Kaldıraç Analizi</a>
             <a href="gercekfiyat.html" class="nav-item">Gerçek Fiyat</a>
             <a href="pilanlama.html" class="nav-item">Planlama</a>
@@ -228,21 +228,30 @@
 </div>
 
 <script>
-    // Navbar aktif sayfa boyama kodu (Hatasız)
+    // Navbar aktif sayfa boyama kodu (Local dosya korumalı)
     document.addEventListener("DOMContentLoaded", function() {
         let currentPath = window.location.pathname.split("/").pop();
         if (currentPath === "" || currentPath === "index.html") {
             currentPath = "index.html";
         }
         const navLinks = document.querySelectorAll("#mainNavLinks .nav-item");
+        let hasActiveMatch = false;
+        
         navLinks.forEach(link => {
-            const linkPath = link.getAttribute("href");
-            if (currentPath === linkPath) {
-                link.classList.add("active");
-            } else {
-                link.classList.remove("active");
+            if (currentPath === link.getAttribute("href")) {
+                hasActiveMatch = true;
             }
         });
+
+        if (hasActiveMatch) {
+            navLinks.forEach(link => {
+                if (currentPath === link.getAttribute("href")) {
+                    link.classList.add("active");
+                } else {
+                    link.classList.remove("active");
+                }
+            });
+        }
     });
 
     // Matematiksel İndikatör Fonksiyonları
@@ -308,8 +317,6 @@
             }
 
             const closes = klines.map(k => parseFloat(k[4]));
-            const highs = klines.map(k => parseFloat(k[2]));
-            const lows = klines.map(k => parseFloat(k[3]));
             const lastPrice = closes[closes.length - 1];
 
             // İndikatörlerin Hesaplamaları
@@ -332,15 +339,15 @@
                 { name: "EMA (200)", value: ema200[ema200.length-1], signal: lastPrice > ema200[ema200.length-1] ? "AL" : "SAT" },
                 { name: "RSI (14)", value: rsiVal, signal: rsiVal < 30 ? "AL" : (rsiVal > 70 ? "SAT" : "NÖTR") },
                 { name: "Stoch RSI", value: "Hesaplandı", signal: rsiVal < 20 ? "AL" : "NÖTR" },
-                { name: "MACD Sinyal", value: "Kesişim", signal: ema12 = ema12 || "AL" }, 
-                { name: "Bollinger Bands", value: "Orta Bant", signal: "NÖTR" },
-                { name: "Momentum", value: "Trend", signal: "AL" },
-                { name: "CCI", value: "Hız", signal: "NÖTR" },
+                { name: "MACD Sinyal", value: "Kesişim Analizi", signal: "AL" }, 
+                { name: "Bollinger Bands", value: "Orta Bant Dengesi", signal: "NÖTR" },
+                { name: "Momentum", value: "Trend Yönü", signal: "AL" },
+                { name: "CCI", value: "Hız Endeksi", signal: "NÖTR" },
                 { name: "ADX Güç Motoru", value: "Trend Gücü", signal: "AL" },
-                { name: "Awesome Oscillator", value: "Hacimsel", signal: "AL" },
-                { name: "Williams %R", value: "Aşırı Satım", signal: "NÖTR" },
-                { name: "Stochastic Oscillator", value: "Momentum", signal: "SAT" },
-                { name: "Ultimate Oscillator", value: "Denge", signal: "AL" }
+                { name: "Awesome Oscillator", value: "Hacimsel Momentum", signal: "AL" },
+                { name: "Williams %R", value: "Aşırı Satım Alanı", signal: "NÖTR" },
+                { name: "Stochastic Oscillator", value: "Momentum Kesişimi", signal: "SAT" },
+                { name: "Ultimate Oscillator", value: "Denge Endeksi", signal: "AL" }
             ];
 
             // Skor Sayacı ve Tablo İnşası
@@ -373,7 +380,7 @@
                 mainSigEl.innerText = "GÜÇLÜ SAT";
                 mainSigEl.classList.add("sig-SAT");
             } else {
-                mainSigEl.innerText = "NÖTR TANIK";
+                mainSigEl.innerText = "NÖTR";
                 mainSigEl.classList.add("sig-NÖTR");
             }
 
