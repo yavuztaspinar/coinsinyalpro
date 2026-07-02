@@ -22,7 +22,7 @@
         /* --- Modern Nav Bar Tasarımı Başlangıcı --- */
         .main-navbar {
             width: 100%;
-            background-color: var(--navbar); /* Siyah yerine soft koyu mavi yapıldı */
+            background-color: var(--navbar);
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -67,7 +67,7 @@
             background-color: rgba(253, 213, 53, 0.1);
         }
         .nav-item.active {
-            color: var(--bg); /* Yazı rengi arka plan tonuna eşlendi */
+            color: var(--bg);
             background-color: var(--gold);
         }
 
@@ -134,7 +134,7 @@
         input, select {
             width: 100%;
             padding: 10px;
-            background-color: var(--input-bg); /* Form içleri soft mavi yapıldı */
+            background-color: var(--input-bg);
             border: 1px solid var(--border);
             color: #fff;
             border-radius: 6px;
@@ -146,7 +146,7 @@
             border-color: var(--gold);
         }
         .coin-select-box {
-            background-color: #1e283d; /* Seçim kutusu arka planı yumuşatıldı */
+            background-color: #1e283d;
             border: 2px dashed var(--gold);
             padding: 15px;
             border-radius: 8px;
@@ -156,7 +156,7 @@
             background-color: var(--gold);
             margin-top: 10px;
             width: 100%;
-            color: var(--bg); /* Buton yazı rengi siyah yerine soft lacivert */
+            color: var(--bg);
             padding: 12px;
             border: none;
             border-radius: 6px;
@@ -170,7 +170,7 @@
         }
         button.calc-btn {
             width: 100%;
-            color: var(--bg); /* Siyah yazı soft gece mavisine çekildi */
+            color: var(--bg);
             padding: 14px;
             border: none;
             border-radius: 6px;
@@ -222,7 +222,7 @@
             letter-spacing: 1px;
         }
         .zone-dip { background-color: var(--green); color: white; } 
-        .zone-fair { background-color: #ffc107; color: var(--bg); } /* Adil değer yazısı koyu mavi */
+        .zone-fair { background-color: #ffc107; color: var(--bg); } 
         .zone-tepe { background-color: var(--red); color: white; } 
         
         #apiStatus {
@@ -393,7 +393,7 @@ async function binanceVerisiniCek() {
     }
 
     statusText.innerText = `Durum: Binance üzerinden ${ticker} fiyatı alınıyor...`;
-    statusText.style.color = var(--text-muted);
+    statusText.style.color = "var(--text-muted)";
     
     try {
         const url = `https://api.binance.com/api/v3/ticker/price?symbol=${ticker}`;
