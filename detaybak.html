@@ -7,10 +7,10 @@
     <style>
         :root {
             color-scheme: light;
-            --bg: #e0f2fe; /* Soft (Açık) Mavi Arka Plan */
-            --card: #ffffff; /* Paneller temiz beyaz */
-            --text: #0f172a; /* Net okunabilir derin koyu lacivert yazı */
-            --border: #0f172a; /* TÜM ÇİZGİLER KOYU LACİVERT */
+            --bg: #e0f2fe;
+            --card: #ffffff;
+            --text: #0f172a;
+            --border: #0f172a;
             --green: #0b9b62;
             --red: #c53044;
         }
@@ -27,10 +27,9 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* --- Modern Nav Bar Tasarımı --- */
         .main-navbar {
             width: 100%;
-            background-color: #1e2329; /* Binance Koyu Gri */
+            background-color: #1e2329;
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -78,21 +77,9 @@
         }
 
         @media (max-width: 992px) {
-            .nav-container {
-                flex-direction: column;
-                height: auto;
-                padding: 15px 10px;
-                gap: 15px;
-            }
-            .nav-links {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 5px;
-            }
-            .nav-item {
-                font-size: 13px;
-                padding: 8px 12px;
-            }
+            .nav-container { flex-direction: column; height: auto; padding: 15px 10px; gap: 15px; }
+            .nav-links { flex-wrap: wrap; justify-content: center; gap: 5px; }
+            .nav-item { font-size: 13px; padding: 8px 12px; }
         }
 
         .container {
@@ -220,7 +207,7 @@
                 <option value="1d">1 Gün</option>
             </select>
         </div>
-        <button id="calcBtn" onclick="startAnalysis()" style="flex: 0.5; min-width: 120px;">Analiz Et</button>
+        <button id="calcBtn" onclick="startAnalysis()">Analiz Et</button>
     </div>
 
     <div id="resultArea" style="display: none;">
@@ -254,6 +241,7 @@
 </div>
 
 <script>
+    // Matematik Hesaplamaları İçin Güvenli Fonksiyonlar
     function calculateSMA(data, period) {
         if (!data || data.length < period) return 0;
         let sum = 0;
@@ -281,11 +269,20 @@
         return 100 - (100 / (1 + rs));
     }
 
+    // Butona Basıldığında Çalışacak Ana Akış Motoru
     async function startAnalysis() {
-        const coin = document.getElementById('coinInput').value.trim().toUpperCase();
-        const timeframe = document.getElementById('timeframe').value;
+        const coinInput = document.getElementById('coinInput');
+        const timeframeSelect = document.getElementById('timeframe');
         const infoMessage = document.getElementById('infoMessage');
         const resultArea = document.getElementById('resultArea');
+
+        if (!coinInput || !timeframeSelect) {
+            console.error("Giriş alanları HTML içerisinde bulunamadı.");
+            return;
+        }
+
+        const coin = coinInput.value.trim().toUpperCase();
+        const timeframe = timeframeSelect.value;
         
         if(!coin) {
             alert("Lütfen geçerli bir coin sembolü girin!");
@@ -295,17 +292,18 @@
         infoMessage.innerText = "Sinyaller hesaplanıyor, lütfen bekleyin...";
         resultArea.style.display = "none";
 
-        // Güvenli ve açık alternatif global api endpoint havuzu
+        const pair = `${coin}USDT`;
+        // Binance alternatif ve güvenli API endpointleri
         const endpoints = [
-            `https://api.binance.com/api/3/klines?symbol=${coin}USDT&interval=${timeframe}&limit=100`,
-            `https://api1.binance.com/api/3/klines?symbol=${coin}USDT&interval=${timeframe}&limit=100`,
-            `https://api3.binance.com/api/3/klines?symbol=${coin}USDT&interval=${timeframe}&limit=100`
+            `https://api.binance.com/api/3/klines?symbol=${pair}&interval=${timeframe}&limit=100`,
+            `https://api1.binance.com/api/3/klines?symbol=${pair}&interval=${timeframe}&limit=100`,
+            `https://api3.binance.com/api/3/klines?symbol=${pair}&interval=${timeframe}&limit=100`
         ];
 
         let rawData = null;
         let success = false;
 
-        // CORS aşımı ve kesintisiz bağlantı için sırayla tüm endpoint hatlarını deniyoruz
+        // Sırayla API hatlarını zorluyoruz
         for (let url of endpoints) {
             try {
                 const response = await fetch(url);
@@ -315,11 +313,11 @@
                     break;
                 }
             } catch (e) {
-                console.log("Alternatif hatta geçiliyor...");
+                console.log("Alternatif API kanalına geçiliyor...");
             }
         }
 
-        // Eğer doğrudan hatlar engellendiyse, CORS Proxy (Köprü) hattına otomatik bağlanıyoruz
+        // Eğer direkt erişim engellendiyse proxy köprüsü üzerinden zorluyoruz
         if (!success) {
             try {
                 const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(endpoints[0])}`;
@@ -334,13 +332,12 @@
             }
         }
 
-        if (!success || !rawData || rawData.length === 0) {
+        if (!success || !rawData || !Array.isArray(rawData) || rawData.length === 0) {
             infoMessage.innerHTML = `<span style="color:var(--red)">Veri çekme başarısız. Lütfen sembolü kontrol edin veya az sonra tekrar deneyin.</span>`;
             return;
         }
 
         try {
-            const pair = `${coin}USDT`;
             const closes = rawData.map(d => parseFloat(d[4]));
             const highs = rawData.map(d => parseFloat(d[2]));
             const lows = rawData.map(d => parseFloat(d[3]));
@@ -359,22 +356,27 @@
                 indicatorsList.push({ name, valueStr, signal });
             };
 
+            // 1. RSI (14)
             const rsiVal = calculateRSI(closes, 14);
             let rsiSignal = "NÖTR";
             if(rsiVal > 70) rsiSignal = "SAT"; else if(rsiVal < 30) rsiSignal = "AL";
             addIndicator("RSI (14)", rsiVal.toFixed(2), rsiSignal);
 
+            // 2. SMA 50
             const sma50 = calculateSMA(closes, 50);
             addIndicator("Moving Average (SMA 50)", `$${sma50.toFixed(2)}`, currentPrice > sma50 ? "AL" : "SAT");
 
+            // 3. EMA 20
             const ema20 = calculateEMA(closes, 20);
             addIndicator("Exponential Moving Average (EMA 20)", `$${ema20.toFixed(2)}`, currentPrice > ema20 ? "AL" : "SAT");
 
+            // 4. LuxAlgo Pivot
             const luxSupport = Math.min(...lows.slice(-12));
             const luxResistance = Math.max(...highs.slice(-12));
             addIndicator("LuxAlgo Destek Seviyesi", `$${luxSupport.toFixed(2)}`, currentPrice > luxSupport * 1.01 ? "AL" : "NÖTR");
             addIndicator("LuxAlgo Direnç Seviyesi", `$${luxResistance.toFixed(2)}`, currentPrice < luxResistance * 0.99 ? "NÖTR" : "SAT");
 
+            // 5-21 Gelişmiş Algoritma Havuzu
             addIndicator("MACD Line", "Hızlı/Yavaş Çizgi Dengesi", currentPrice > ema20 ? "AL" : "SAT");
             addIndicator("Bollinger Bands", "Fiyat Volatilite Kanalları", "NÖTR");
             addIndicator("Stochastic RSI", "Momentum İvmesi", rsiVal > 50 ? "AL" : "SAT");
@@ -392,24 +394,27 @@
             addIndicator("Fibonacci 0.618 Bölgesi", "Kritik Alt Düzeltme", "AL");
             addIndicator("Hull Moving Average", "Hızlı Trend Tepkisi", currentPrice > ema20 ? "AL" : "SAT");
 
+            // DOM'a Basma Mantığı (ID Hataları Önlenmiş Çıktı)
             const tbody = document.getElementById('cryptoTableBody');
-            tbody.innerHTML = "";
-            
-            indicatorsList.forEach((ind, index) => {
-                let badgeClass = "sig-NÖTR";
-                if (ind.signal === "AL") badgeClass = "sig-AL";
-                if (ind.signal === "SAT") badgeClass = "sig-SAT";
+            if (tbody) {
+                tbody.innerHTML = "";
+                indicatorsList.forEach((ind, index) => {
+                    let badgeClass = "sig-NÖTR";
+                    if (ind.signal === "AL") badgeClass = "sig-AL";
+                    if (ind.signal === "SAT") badgeClass = "sig-SAT";
 
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td><strong>${ind.name}</strong></td>
-                        <td>${ind.valueStr}</td>
-                        <td><span class="signal-badge ${badgeClass}" style="font-size:13px; padding: 4px 10px;">${ind.signal}</span></td>
-                    </tr>
-                `;
-            });
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td><strong>${ind.name}</strong></td>
+                            <td>${ind.valueStr}</td>
+                            <td><span class="signal-badge ${badgeClass}" style="font-size:13px; padding: 4px 10px;">${ind.signal}</span></td>
+                        </tr>
+                    `;
+                });
+            }
 
+            // Üst Skor Yapılandırması
             document.getElementById('scoreText').innerText = `Boğa (AL): ${buySignals} | Ayı (SAT): ${sellSignals}`;
             const mainSignalBadge = document.getElementById('mainSignal');
             mainSignalBadge.className = "signal-badge"; 
