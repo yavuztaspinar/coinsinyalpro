@@ -2,41 +2,70 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Gelişmiş Kripto Analiz Motoru</title>
+    <title>Hyperliquid Kaldıraç & Long/Short Analiz Motoru</title>
     <style>
-        :root { --bg: #0b0e11; --card: #181a20; --text: #eaecef; --gold: #fcd535; --green: #0ecb81; --red: #f6465d; --border: #2b3139; }
+        /* Açık Tema (Beyaz Arka Plan) Renk Paleti */
+        :root { 
+            --bg: #ffffff; 
+            --card: #f8f9fa; 
+            --text: #1e2329; 
+            --gold: #f3ba2f; 
+            --green: #0ecb81; 
+            --red: #f6465d; 
+            --border: #eaecef; 
+        }
+        
         body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 1000px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
-        h2 { text-align: center; color: var(--gold); }
-        .control-panel { display: flex; gap: 10px; margin-bottom: 20px; }
-        input, select, button { padding: 10px; background: #2b3139; border: 1px solid var(--border); color: #fff; border-radius: 4px; }
-        button { background: var(--gold); color: #000; font-weight: bold; cursor: pointer; border: none; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 10px; border-bottom: 1px solid var(--border); text-align: left; }
-        .sig-AL { color: var(--green); font-weight: bold; } 
-        .sig-SAT { color: var(--red); font-weight: bold; } 
-        .sig-NÖTR { color: #848e9c; }
-        .error { color: var(--red); text-align: center; margin-top: 10px; }
+        .container { width: 100%; max-width: 1000px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        h2 { text-align: center; color: #1e2329; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #707a8a; font-size: 14px; margin-bottom: 20px; }
+        .control-panel { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+        
+        input { padding: 10px; background: #ffffff; border: 1px solid var(--border); color: var(--text); border-radius: 4px; outline: none; }
+        input:focus { border-color: var(--gold); }
+        button { padding: 10px; background: var(--gold); color: #000; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; transition: 0.2s; }
+        button:hover { opacity: 0.9; }
+        
+        /* Long/Short Oran Barı */
+        .ratio-bar-container { background: #eaecef; height: 24px; border-radius: 12px; display: flex; overflow: hidden; margin: 20px 0; font-weight: bold; font-size: 12px; line-height: 24px; text-align: center; }
+        .long-bar { background: var(--green); color: #000; transition: width 0.5s; }
+        .short-bar { background: var(--red); color: #fff; transition: width 0.5s; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #ffffff; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px; border-bottom: 1px solid var(--border); text-align: left; }
+        th { background: #f0f1f2; color: #474d57; font-weight: 600; }
+        
+        .sig-BOĞA { color: var(--green); font-weight: bold; } 
+        .sig-AYI { color: var(--red); font-weight: bold; } 
+        .sig-NÖTR { color: #707a8a; font-weight: bold; }
+        .error { color: var(--red); text-align: center; margin-top: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 <div class="container">
     <h2>📊 YAVUZ TAŞPINAR KALDIRAÇ ORANLARI</h2>
+    <div class="subtitle">Hyperliquid Canlı Veri Analiz Motoru</div>
+    
     <div class="control-panel">
-        <input type="text" id="coinInput" value="BTC" placeholder="Coin (Örn: BTC)">
-        <select id="timeframe">
-            <option value="1h" selected>1 Saat</option>
-            <option value="4h">4 Saat</option>
-            <option value="1d">1 Gün</option>
-        </select>
-        <button onclick="startAnalysis()">Analiz Et</button>
+        <input type="text" id="coinInput" value="BTC" placeholder="Coin (Örn: BTC, ETH, SOL)">
+        <button onclick="startHyperliquidAnalysis()">Analiz Et</button>
     </div>
+    
     <div id="errorArea" class="error" style="display:none;"></div>
+    
     <div id="resultArea" style="display:none;">
-        <h3 id="targetTitle"></h3>
+        <h3 id="targetTitle" style="text-align: center; color: #1e2329;"></h3>
+        
+        <!-- Canlı Long/Short Dağılım Barı -->
+        <div style="text-align: center; margin-bottom: 5px; font-weight: bold; color: #474d57;">Tahmini Duyarlılık (Sentiment) Dengesi</div>
+        <div class="ratio-bar-container">
+            <div id="longBar" class="long-bar" style="width: 50%;">LONG %50</div>
+            <div id="shortBar" class="short-bar" style="width: 50%;">SHORT %50</div>
+        </div>
+
         <table>
             <thead>
-                <tr><th>#</th><th>İndikatör</th><th>Değer</th><th>Sinyal</th></tr>
+                <tr><th>#</th><th>Kaldıraç / Likidite Metriği</th><th>Mevcut Değer</th><th>Piyasa Yönü</th></tr>
             </thead>
             <tbody id="indicatorRows"></tbody>
         </table>
@@ -44,97 +73,128 @@
 </div>
 
 <script>
-    // Yardımcı Matematik Fonksiyonları
-    const SMA = (d, p) => d.map((_, i) => i < p - 1 ? 0 : d.slice(i - p + 1, i + 1).reduce((a, b) => a + b, 0) / p);
-    const EMA = (d, p) => { let k = 2/(p+1), ema = [d[0]]; for(let i=1; i<d.length; i++) ema.push(d[i]*k + ema[i-1]*(1-k)); return ema; };
-    const StdDev = (d, p, smas) => d.map((_, i) => i < p - 1 ? 0 : Math.sqrt(d.slice(i-p+1, i+1).reduce((a, b) => a + Math.pow(b - smas[i], 2), 0) / p));
-    
-    // Gerçekçi RSI Hesaplama Fonksiyonu
-    const CalcRSI = (closes, p = 14) => {
-        let gains = [], losses = [];
-        for (let i = 1; i < closes.length; i++) {
-            let diff = closes[i] - closes[i-1];
-            gains.push(diff > 0 ? diff : 0);
-            losses.push(diff < 0 ? -diff : 0);
-        }
-        let avgGain = gains.slice(0, p).reduce((a,b)=>a+b,0) / p;
-        let avgLoss = losses.slice(0, p).reduce((a,b)=>a+b,0) / p;
-        
-        let rsi = [100 - (100 / (1 + (avgGain / (avgLoss || 1))))];
-        for (let i = p; i < closes.length - 1; i++) {
-            avgGain = (avgGain * (p - 1) + gains[i]) / p;
-            avgLoss = (avgLoss * (p - 1) + losses[i]) / p;
-            rsi.push(100 - (100 / (1 + (avgGain / (avgLoss || 1)))));
-        }
-        return rsi[rsi.length - 1];
-    };
-
-    async function startAnalysis() {
+    async function startHyperliquidAnalysis() {
         const coin = document.getElementById("coinInput").value.trim().toUpperCase();
-        const tf = document.getElementById("timeframe").value;
         const errorArea = document.getElementById("errorArea");
         const resultArea = document.getElementById("resultArea");
         
         errorArea.style.display = "none";
         
         try {
-            const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin}USDT&interval=${tf}&limit=500`);
-            if (!res.ok) throw new Error("Coin bulunamadı veya API hatası!");
-            
-            const klines = await res.json();
-            const closes = klines.map(k => parseFloat(k[4])), highs = klines.map(k => parseFloat(k[2])), lows = klines.map(k => parseFloat(k[3]));
-            const len = closes.length - 1, current = closes[len];
-
-            let indicators = [];
-
-            // 1. RSI Hesaplama ve Sinyal
-            const rsiVal = CalcRSI(closes, 14);
-            let rsiSig = "NÖTR";
-            if (rsiVal > 70) rsiSig = "SAT";
-            else if (rsiVal < 30) rsiSig = "AL";
-            indicators.push({ name: "RSI (14)", val: rsiVal.toFixed(2), sig: rsiSig });
-
-            // 2. Hareketli Ortalamalar (SMA & EMA Kesişimi)
-            const sma20 = SMA(closes, 20), ema50 = EMA(closes, 50);
-            const curSma20 = sma20[len], curEma50 = ema50[len];
-            indicators.push({ 
-                name: "Trend (SMA20 / EMA50)", 
-                val: `SMA: ${curSma20.toFixed(2)} | EMA: ${curEma50.toFixed(2)}`, 
-                sig: curSma20 > curEma50 ? "AL" : "SAT" 
+            // Hyperliquid HTTP API Endpoint
+            const response = await fetch('https://api.hyperliquid.xyz/info', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: "metaAndAssetCtxs" })
             });
 
-            // 3. Bollinger Bantları Gerginliği
-            const sdev = StdDev(closes, 20, sma20);
-            const upperBB = curSma20 + (sdev[len] * 2), lowerBB = curSma20 - (sdev[len] * 2);
-            let bbSig = "NÖTR";
-            if (current >= upperBB) bbSig = "SAT";
-            else if (current <= lowerBB) bbSig = "AL";
-            indicators.push({ name: "Bollinger Bands", val: `Alt: ${lowerBB.toFixed(1)} - Üst: ${upperBB.toFixed(1)}`, sig: bbSig });
+            if (!response.ok) throw new Error("Hyperliquid API bağlantı hatası.");
 
-            // 4. Likidite Motoru ve Kaldıraç Riskleri
-            const recentLow = Math.min(...lows.slice(len-20, len)), recentHigh = Math.max(...highs.slice(len-20, len));
-            const longRisk = ((current - recentLow) / recentLow) * 100;
-            const shortRisk = ((recentHigh - current) / current) * 100;
+            const data = await response.json();
+            
+            // Hyperliquid meta verileri ve anlık durumları ayırma
+            const universe = data[0].universe;
+            const assetCtxs = data[1];
 
-            indicators.push({ name: "🔥 Long Tasfiye Riski", val: `Risk: ${Math.min(100, longRisk*2).toFixed(1)}%`, sig: longRisk < 2 ? "AL" : (longRisk > 15 ? "SAT" : "NÖTR") });
-            indicators.push({ name: "⚠️ Short Sıkıştırma Riski", val: `Risk: ${Math.min(100, shortRisk*2).toFixed(1)}%`, sig: shortRisk < 2 ? "SAT" : (shortRisk > 15 ? "AL" : "NÖTR") });
+            // Kullanıcının aradığı coini bulma
+            const coinIndex = universe.findIndex(asset => asset.name === coin);
+            
+            if (coinIndex === -1) {
+                throw new Error(`${coin} Hyperliquid borsasında bulunamadı! Lütfen geçerli bir varlık girin (Örn: BTC, ETH, SOL, PURR).`);
+            }
+
+            const ctx = assetCtxs[coinIndex];
+            
+            // Hyperliquid'den gelen ham verileri işleme
+            const markPrice = parseFloat(ctx.oraclePx);
+            const openInterest = parseFloat(ctx.openInterest); 
+            const fundingRate = parseFloat(ctx.fundingRate) * 100 * 8; 
+            const dailyVolume = parseFloat(ctx.dayNtlVlm); 
+
+            // Basit bir Akıllı Algoritma ile Long/Short Dengesi Tahmini
+            let longRatio = 50 + (fundingRate * 200); 
+            if(longRatio > 85) longRatio = 85; 
+            if(longRatio < 15) longRatio = 15;
+            let shortRatio = 100 - longRatio;
+
+            // Bar Grafiğini Güncelleme
+            document.getElementById("longBar").style.width = `${longRatio.toFixed(1)}%`;
+            document.getElementById("longBar").innerText = `LONG %${longRatio.toFixed(1)}`;
+            document.getElementById("shortBar").style.width = `${shortRatio.toFixed(1)}%`;
+            document.getElementById("shortBar").innerText = `SHORT %${shortRatio.toFixed(1)}`;
+
+            // Tablo İçeriğini Hazırlama
+            let metrics = [];
+
+            metrics.push({
+                name: "🎯 Güncel Fiyat (Oracle)",
+                val: `$${markPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})}`,
+                sig: "NÖTR"
+            });
+
+            const oiInUsd = openInterest * markPrice;
+            metrics.push({
+                name: "📈 Toplam Açık Pozisyon (OI)",
+                val: `$${oiInUsd.toLocaleString(undefined, {maximumFractionDigits: 0})}`,
+                sig: oiInUsd > 10000000 ? "BOĞA" : "NÖTR" 
+            });
+
+            let fundingSig = "NÖTR";
+            if (fundingRate > 0.01) fundingSig = "BOĞA"; 
+            if (fundingRate < -0.01) fundingSig = "AYI"; 
+            metrics.push({
+                name: "💸 8s Fonlama Oranı (Funding Rate)",
+                val: `%${fundingRate.toFixed(4)}`,
+                sig: fundingSig
+            });
+
+            metrics.push({
+                name: "📊 24 Saatlik İşlem Hacmi",
+                val: `$${dailyVolume.toLocaleString(undefined, {maximumFractionDigits: 0})}`,
+                sig: "NÖTR"
+            });
+
+            let riskSig = "NÖTR";
+            let riskText = "Dengeli Piyasa";
+            if (fundingRate > 0.03) {
+                riskText = "Yüksek Long Tasfiye Riski! (Sıkışma Gelebilir)";
+                riskSig = "AYI";
+            } else if (fundingRate < -0.03) {
+                riskText = "Yüksek Short Sıkıştırma (Short Squeeze) Riski!";
+                riskSig = "BOĞA";
+            } else {
+                riskText = "Yatay/Güvenli Tasfiye Bölgesi";
+            }
+            metrics.push({
+                name: "🔥 Likidite ve Risk Durumu",
+                val: riskText,
+                sig: riskSig
+            });
 
             // Tabloyu Ekrana Basma
             const tbody = document.getElementById("indicatorRows"); 
             tbody.innerHTML = "";
-            indicators.forEach((ind, i) => {
-                tbody.innerHTML += `<tr><td>${i+1}</td><td>${ind.name}</td><td>${ind.val}</td><td class="sig-${ind.sig}">${ind.sig}</td></tr>`;
+            metrics.forEach((m, i) => {
+                tbody.innerHTML += `<tr>
+                    <td>${i+1}</td>
+                    <td><b>${m.name}</b></td>
+                    <td>${m.val}</td>
+                    <td class="sig-${m.sig}">${m.sig}</td>
+                </tr>`;
             });
             
             resultArea.style.display = "block";
-            document.getElementById("targetTitle").innerText = `${coin}/USDT Analizi`;
+            document.getElementById("targetTitle").innerText = `${coin}/USDC - Hyperliquid Vadeli Verileri`;
             
         } catch (error) {
             resultArea.style.display = "none";
             errorArea.style.display = "block";
-            errorArea.innerText = "Hata: Geçersiz coin adı girdiniz veya Binance API'sine erişilemedi. (Örn: BTC, ETH, SOL)";
+            errorArea.innerText = "Hata: " + error.message;
         }
     }
+
+    // Sayfa açıldığında otomatik ilk analizi yap
+    window.onload = () => { startHyperliquidAnalysis(); };
 </script>
 </body>
 </html>
