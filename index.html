@@ -22,82 +22,13 @@
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background-color: var(--bg);
             color: var(--text);
-            padding: 0 0 40px 0;
+            padding: 20px 0 40px 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             margin: 0;
             -webkit-font-smoothing: antialiased;
         }
-
-        /* --- Merkezden Gelecek Olan Navbar İçin CSS Kural Tanımlamaları --- */
-        .main-navbar {
-            width: 100%;
-            background-color: #1e2329;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        .nav-container {
-            max-width: 1600px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 70px;
-            padding: 0 20px;
-        }
-        .nav-logo {
-            color: #fcd535;
-            font-size: 20px;
-            font-weight: 800;
-            text-decoration: none;
-            letter-spacing: 1px;
-        }
-        .nav-links {
-            display: flex;
-            gap: 10px;
-            height: 100%;
-            align-items: center;
-        }
-        .nav-item {
-            color: #eaecef;
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: 600;
-            padding: 10px 18px;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-        }
-        .nav-item:hover {
-            color: #fcd535;
-            background-color: rgba(253, 213, 53, 0.1);
-        }
-        .nav-item.active {
-            color: #1e2329 !important;
-            background-color: #fcd535 !important;
-        }
-
-        @media (max-width: 992px) {
-            .nav-container {
-                flex-direction: column;
-                height: auto;
-                padding: 15px 10px;
-                gap: 15px;
-            }
-            .nav-links {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 5px;
-            }
-            .nav-item {
-                font-size: 13px;
-                padding: 8px 12px;
-            }
-        }
-        /* --- Tasarım Bitiş --- */
 
         .scanner-box {
             width: 100%;
@@ -194,8 +125,6 @@
 </head>
 <body>
 
-<div id="dynamic-navbar" style="width: 100%;"></div>
-
 <div class="scanner-box">
     <h2>🎯 BALİNASAVAR PRO // DİP UYUMSUZLUK AVCISI</h2>
     <div class="grid-controls">
@@ -274,26 +203,6 @@
 </div>
 
 <script>
-    fetch('navbar.html')
-        .then(response => {
-            if (!response.ok) throw new Error("Navbar dosyası bulunamadı.");
-            return response.text();
-        })
-        .then(data => {
-            document.getElementById('dynamic-navbar').innerHTML = data;
-            
-            // İçerideki script elementlerini yakalayıp çalıştırıyoruz
-            const scripts = document.getElementById('dynamic-navbar').querySelectorAll('script');
-            scripts.forEach(oldScript => {
-                const newScript = document.createElement('script');
-                newScript.text = oldScript.text;
-                document.body.appendChild(newScript);
-            });
-        })
-        .catch(error => console.error("Menü yükleme hatası:", error));
-</script>
-
-<script>
     let backupCryptoMatrix = [];
 
     const riskliArzListesi = {
@@ -335,7 +244,6 @@
         if (!klines || klines.length < 15) return [];
         let len = klines.length;
         let rsiValues = new Array(len).fill(null);
-        
         let gains = [];
         let losses = [];
         
@@ -345,8 +253,7 @@
             losses.push(diff < 0 ? Math.abs(diff) : 0);
         }
         
-        let sumGains = 0;
-        let sumLosses = 0;
+        let sumGains = 0; let sumLosses = 0;
         for (let i = 0; i < 14; i++) {
             sumGains += gains[i];
             sumLosses += losses[i];
@@ -392,143 +299,81 @@
 
     function checkGoldenDeathCross(klines) {
         if (!klines || klines.length < 202) return { state: "Yetersiz Veri", isBullish: false, isBearish: false };
-        
         let closePrices = klines.map(k => parseFloat(k[4]));
         let sma50 = calculateSMA(closePrices, 50);
         let sma200 = calculateSMA(closePrices, 200);
-        
         let len = closePrices.length;
-        let currentSma50 = sma50[len - 1];
-        let currentSma200 = sma200[len - 1];
-        let prevSma50 = sma50[len - 2];
-        let prevSma200 = sma200[len - 2];
-
-        if (prevSma50 <= prevSma200 && currentSma50 > currentSma200) {
-            return { state: "🌟 GOLDEN CROSS", isBullish: true, isBearish: false };
-        } else if (prevSma50 >= prevSma200 && currentSma50 < currentSma200) {
-            return { state: "💀 DEATH CROSS", isBullish: false, isBearish: true };
-        } else if (currentSma50 > currentSma200) {
-            return { state: "📈 Boğa (SMA50 > 200)", isBullish: true, isBearish: false };
-        } else {
-            return { state: "📉 Ayı (SMA50 < 200)", isBullish: false, isBearish: true };
-        }
+        
+        if (sma50[len - 2] <= sma200[len - 2] && sma50[len - 1] > sma200[len - 1]) return { state: "🌟 GOLDEN CROSS", isBullish: true, isBearish: false };
+        if (sma50[len - 2] >= sma200[len - 2] && sma50[len - 1] < sma200[len - 1]) return { state: "💀 DEATH CROSS", isBullish: false, isBearish: true };
+        return sma50[len - 1] > sma200[len - 1] ? { state: "📈 Boğa (SMA50>200)", isBullish: true, isBearish: false } : { state: "📉 Ayı (SMA50<200)", isBullish: false, isBearish: true };
     }
 
     function calculateMACD(klines) {
         if (!klines || klines.length < 35) return null;
-        try {
-            let closePrices = klines.map(k => parseFloat(k[4]));
-            let ema12 = calculateEMA(closePrices, 12);
-            let ema26 = calculateEMA(closePrices, 26);
-            
-            let macdLine = new Array(closePrices.length).fill(0);
-            for (let i = 0; i < closePrices.length; i++) {
-                macdLine[i] = ema12[i] - ema26[i];
-            }
-            let signalLine = calculateEMA(macdLine, 9);
-            let len = closePrices.length;
-            return {
-                macd: macdLine[len - 1],
-                signal: signalLine[len - 1],
-                prevMacd: macdLine[len - 2],
-                prevSignal: signalLine[len - 2]
-            };
-        } catch(e) { return null; }
+        let closePrices = klines.map(k => parseFloat(k[4]));
+        let ema12 = calculateEMA(closePrices, 12);
+        let ema26 = calculateEMA(closePrices, 26);
+        let macdLine = ema12.map((v, i) => v - ema26[i]);
+        let signalLine = calculateEMA(macdLine, 9);
+        let len = closePrices.length;
+        return { macd: macdLine[len - 1], signal: signalLine[len - 1], prevMacd: macdLine[len - 2], prevSignal: signalLine[len - 2] };
     }
 
     function checkVolumeSpike(klines) {
         if (!klines || klines.length < 21) return null;
         let volumes = klines.map(k => parseFloat(k[5]));
         let currentVol = volumes[volumes.length - 1];
-        let previous20Vol = volumes.slice(-21, -1);
-        let avgVol = previous20Vol.reduce((a, b) => a + b, 0) / 20;
-        if(avgVol === 0) return { isSpike: false, ratio: "1.00" };
-        return {
-            isSpike: currentVol > (avgVol * 1.25), 
-            ratio: (currentVol / avgVol).toFixed(2)
-        };
+        let avgVol = volumes.slice(-21, -1).reduce((a, b) => a + b, 0) / 20;
+        return { isSpike: currentVol > (avgVol * 1.25), ratio: avgVol === 0 ? "1.00" : (currentVol / avgVol).toFixed(2) };
     }
 
     function calculateHistoricalDip(klines) {
         if(!klines || klines.length < 30) return null;
         let currentPrice = parseFloat(klines[klines.length - 1][4]);
-        let lows = klines.map(k => parseFloat(k[3]));
-        let absoluteLow = Math.min(...lows);
-        if(absoluteLow === 0) return { isPureDip: false, distance: "0.00" };
-        let distanceToLow = ((currentPrice - absoluteLow) / absoluteLow) * 100;
-        return {
-            isPureDip: distanceToLow <= 1.2,
-            distance: distanceToLow.toFixed(2)
-        };
+        let absoluteLow = Math.min(...klines.map(k => parseFloat(k[3])));
+        let distanceToLow = ((currentPrice - absoluteLow) / (absoluteLow || 1)) * 100;
+        return { isPureDip: distanceToLow <= 1.2, distance: distanceToLow.toFixed(2) };
     }
 
     function checkBullishDivergence(klines, rsiValues) {
         if (!klines || klines.length < 35 || rsiValues.length < 35) return { isDiv: false, rsiDiff: "0.00" };
-        try {
-            let len = klines.length;
-            let currentLow = parseFloat(klines[len - 1][3]);
-            let currentRSI = rsiValues[len - 1];
+        let len = klines.length;
+        let currentLow = parseFloat(klines[len - 1][3]);
+        let currentRSI = rsiValues[len - 1];
+        if(currentRSI === null || currentRSI > 45) return { isDiv: false, rsiDiff: "0.00" };
 
-            if(currentRSI === null || currentRSI > 45) return { isDiv: false, rsiDiff: "0.00" };
-
-            for(let i = len - 25; i < len - 4; i++) {
-                let pastLow = parseFloat(klines[i][3]);
-                let pastRSI = rsiValues[i];
-                if(pastRSI !== null && currentLow < pastLow && currentRSI > pastRSI && pastRSI < 35) {
-                    return { isDiv: true, rsiDiff: (currentRSI - pastRSI).toFixed(2) };
-                }
+        for(let i = len - 25; i < len - 4; i++) {
+            let pastLow = parseFloat(klines[i][3]);
+            let pastRSI = rsiValues[i];
+            if(pastRSI !== null && currentLow < pastLow && currentRSI > pastRSI && pastRSI < 35) {
+                return { isDiv: true, rsiDiff: (currentRSI - pastRSI).toFixed(2) };
             }
-        } catch (e) { return { isDiv: false, rsiDiff: "0.00" }; }
+        }
         return { isDiv: false, rsiDiff: "0.00" };
     }
 
     function calculateVWMAAndCross(klines, period = 20) {
         if (!klines || klines.length < (period + 2)) return { state: "N/A", isBullish: false };
-        
         let len = klines.length;
-
-        let pvSumCurrent = 0, vSumCurrent = 0, closeSumCurrent = 0;
-        for (let i = 0; i < period; i++) {
-            let kCurrent = klines[len - 1 - i];
-            let closeC = parseFloat(kCurrent[4]);
-            let volC = parseFloat(kCurrent[5]);
-            pvSumCurrent += (closeC * volC);
-            vSumCurrent += volC;
-            closeSumCurrent += closeC;
-        }
-        let vwmaCurrent = vSumCurrent === 0 ? 0 : pvSumCurrent / vSumCurrent;
-        let smaCurrent = closeSumCurrent / period;
-
-        let pvSumPrev = 0, vSumPrev = 0, closeSumPrev = 0;
-        for (let i = 0; i < period; i++) {
-            let kPrev = klines[len - 2 - i];
-            let closeP = parseFloat(kPrev[4]);
-            let volP = parseFloat(kPrev[5]);
-            pvSumPrev += (closeP * volP);
-            vSumPrev += volP;
-            closeSumPrev += closeP; 
-        }
-        let vwmaPrev = vSumPrev === 0 ? 0 : pvSumPrev / vSumPrev;
-        let smaPrev = closeSumPrev / period;
-
-        if (vwmaPrev <= smaPrev && vwmaCurrent > smaCurrent) {
-            return { state: "🚀 Yukarı Kesişim", isBullish: true };
-        } else if (vwmaCurrent > smaCurrent) {
-            return { state: "📈 Boğa Eğilimi", isBullish: true };
-        } else {
-            return { state: "📉 Ayı Eğilimi", isBullish: false };
-        }
+        const getVWMA = (offset) => {
+            let pv = 0, v = 0, c = 0;
+            for(let i=0; i<period; i++) {
+                let k = klines[len - 1 - i - offset];
+                let close = parseFloat(k[4]), vol = parseFloat(k[5]);
+                pv += (close * vol); v += vol; c += close;
+            }
+            return { vwma: v === 0 ? 0 : pv / v, sma: c / period };
+        };
+        let cur = getVWMA(0), prev = getVWMA(1);
+        if (prev.vwma <= prev.sma && cur.vwma > cur.sma) return { state: "🚀 Yukarı Kesişim", isBullish: true };
+        return cur.vwma > cur.sma ? { state: "📈 Boğa Eğilimi", isBullish: true } : { state: "📉 Ayı Eğilimi", isBullish: false };
     }
 
     function generateTradeSignal(rsiNow, rsiPrev, macdData, volData, dipData, divData, rsiLimit, coinSymbol, vwmaData, crossData) {
         if (rsiNow === null) return { action: "BEKLE", class: "trade-hold", confirmed: false };
-
-        const bugun = new Date();
-        const gun = bugun.getDate(); 
-
-        if (coinSymbol === "STRK" && (gun >= 12 && gun <= 17)) {
-            return { action: "RİSK", class: "trade-sell", confirmed: false, isCustomReason: true, reason: "KİLİT RİSKİ" };
-        }
+        const gun = new Date().getDate(); 
+        if (coinSymbol === "STRK" && (gun >= 12 && gun <= 17)) return { action: "RİSK", class: "trade-sell", confirmed: false, isCustomReason: true, reason: "KİLİT RİSKİ" };
         
         const rsiDonusOnay = rsiPrev !== null && rsiNow > rsiPrev && (rsiPrev < (rsiLimit + 5)); 
         const macdConf = macdData && (macdData.macd > macdData.signal);
@@ -538,19 +383,13 @@
         const isDivergenceBuy = (divData && divData.isDiv);
         const isReversalBuy = rsiDonusOnay && macdConf;
         const isDipBuy = (rsiNow <= rsiLimit && dipData && dipData.isPureDip && rsiNow > rsiPrev);
-                                      
+                                           
         if (isReversalBuy || isDipBuy || isDivergenceBuy) {
             let isFullyConfirmed = (macdConf && vwmaConf) || (isDivergenceBuy && (rsiNow > rsiPrev || volConf)) || (vwmaData && vwmaData.state.includes("🚀"));
             if (riskliArzListesi[coinSymbol] && !volConf) isFullyConfirmed = false; 
-
             return { action: "AL", class: "trade-buy", confirmed: isFullyConfirmed };
         }
-
-        const isOverboughtSell = (rsiNow >= 72 && rsiPrev !== null && rsiNow < rsiPrev);
-        const isMacdBearishCross = (macdData && macdData.macd < macdData.signal && macdData.prevMacd >= macdData.prevSignal);
-        const isDeathCrossState = crossData && crossData.isBearish;
-                                
-        if (isOverboughtSell || (rsiNow > 60 && isMacdBearishCross) || (rsiNow > 65 && isDeathCrossState)) {
+        if ((rsiNow >= 72 && rsiPrev !== null && rsiNow < rsiPrev) || (rsiNow > 60 && macdData && macdData.macd < macdData.signal && macdData.prevMacd >= macdData.prevSignal)) {
             return { action: "SAT", class: "trade-sell", confirmed: true };
         }
         return { action: "BEKLE", class: "trade-hold", confirmed: false };
@@ -601,7 +440,8 @@
 
             if (targets.length === 0) throw new Error("Filtreye uygun aktif parite bulunamadı.");
 
-            const chunkSize = 15; 
+            // Hız limiti koruması için paket boyutu 8'e düşürüldü
+            const chunkSize = 8; 
 
             for (let i = 0; i < targets.length; i += chunkSize) {
                 const chunk = targets.slice(i, i + chunkSize);
@@ -610,10 +450,10 @@
 
                 await Promise.all(chunk.map(async (coin) => {
                     try {
-                        const kRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin.symbol}&interval=${tf}&limit=500`);
+                        const kRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin.symbol}&interval=${tf}&limit=250`);
                         if(!kRes.ok) return;
                         const klines = await kRes.json();
-                        if(!klines || klines.length < 202) return;
+                        if(!klines || klines.length < 35) return;
 
                         let rsiValues = calculateAllRSI(klines);
                         let rsiNow = rsiValues[rsiValues.length - 1];
@@ -632,8 +472,10 @@
                         let isPureDip = (rsiNow !== null && rsiNow <= rsiLimit && dipData && dipData.isPureDip);
                         let isDivActive = divData && divData.isDiv;
 
+                        // Önemli Değişiklik: Eğer strateji Modu all (hepsi) ise filtreleri tamamen gevşetiyoruz
                         if (strategyMode === "reversal" && !isReversal && !isDivActive) return;
                         if (strategyMode === "pure_dip" && !isPureDip) return;
+                        if (strategyMode === "all" && rsiNow > rsiLimit && !isDivActive && !isPureDip && tradeSignal.action !== "AL") return;
 
                         let signalType = "Yatay Trend";
                         if (isDivActive && isPureDip) signalType = "Uyuşmazlık + Dip";
@@ -643,24 +485,15 @@
 
                         let arzBadge = `<span style="color:var(--text-muted); font-size:13px; font-weight:600;">Temiz</span>`;
                         if (riskliArzListesi[coin.pureSymbol]) {
-                            const rInfo = riskliArzListesi[coin.pureSymbol];
-                            arzBadge = `<span style="color:var(--red); font-size:13px; font-weight:bold;">⚠️ ${rInfo.risk}</span>`;
+                            arzBadge = `<span style="color:var(--red); font-size:13px; font-weight:bold;">⚠️ ${riskliArzListesi[coin.pureSymbol].risk}</span>`;
                         }
 
-                        let onayRozeti = '';
-                        if(tradeSignal.isCustomReason) {
-                            onayRozeti = `<span class="badge" style="color:#e67e22; background:rgba(230,126,34,0.12); border:1px solid #e67e22;">${tradeSignal.reason}</span>`;
-                        } else {
-                            onayRozeti = tradeSignal.confirmed ? '<span class="badge badge-confirm badge-strong-confirm">GÜÇLÜ</span>' : '<span class="badge badge-confirm badge-weak-confirm">Zayıf</span>';
-                        }
+                        let onayRozeti = tradeSignal.isCustomReason ? 
+                            `<span class="badge" style="color:#e67e22; background:rgba(230,126,34,0.12); border:1px solid #e67e22;">${tradeSignal.reason}</span>` : 
+                            (tradeSignal.confirmed ? '<span class="badge badge-confirm badge-strong-confirm">GÜÇLÜ</span>' : '<span class="badge badge-confirm badge-weak-confirm">Zayıf</span>');
 
                         let vwmaColor = vwmaData.state.includes("🚀") ? "var(--green)" : (vwmaData.isBullish ? "#2fc787" : "var(--red)");
-                        
-                        let crossColor = "var(--text-muted)";
-                        if(crossData.state.includes("GOLDEN")) crossColor = "var(--green)";
-                        else if(crossData.state.includes("DEATH")) crossColor = "var(--red)";
-                        else if(crossData.isBullish) crossColor = "#2fc787";
-                        else if(crossData.isBearish) crossColor = "#df334a";
+                        let crossColor = crossData.state.includes("GOLDEN") ? "var(--green)" : (crossData.state.includes("DEATH") ? "var(--red)" : (crossData.isBullish ? "#2fc787" : "#df334a"));
 
                         const row = document.createElement("tr");
                         row.className = "match-row";
@@ -682,12 +515,18 @@
                         list.appendChild(row);
                     } catch (e) { console.error(e); }
                 }));
-                await new Promise(r => setTimeout(r, 80));
+                // API Rate Limit yememek için bekleme süresi 120ms yapıldı
+                await new Promise(r => setTimeout(r, 120));
             }
 
-            document.getElementById("info").style.color = "var(--green)";
-            document.getElementById("info").innerText = `🎯 Tarama Başarıyla Tamamlandı! Toplam ${list.children.length} parite listelendi.`;
-            table.style.display = "table";
+            if(list.children.length === 0) {
+                info.style.color = "var(--gold)";
+                info.innerText = `⚠️ Tarama bitti fakat şu an piyasada seçtiğiniz RSI sınırında (${rsiLimit} altı) uygun dip/uyuşmazlık paritesi bulunamadı.`;
+            } else {
+                info.style.color = "var(--green)";
+                info.innerText = `🎯 Tarama Başarıyla Tamamlandı! Toplam ${list.children.length} parite listelendi.`;
+                table.style.display = "table";
+            }
 
         } catch (error) {
             console.error(error);
