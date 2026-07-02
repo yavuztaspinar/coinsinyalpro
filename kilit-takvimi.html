@@ -16,19 +16,17 @@
             --green: #0ecb81;
             --red: #f6465d;
         }
-
         body { 
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
-            margin: 0; 
-            padding: 0 0 40px 0; 
-            background-color: var(--bg); 
-            color: var(--text);
+             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+             margin: 0; 
+             padding: 0 0 40px 0; 
+             background-color: var(--bg); 
+             color: var(--text);
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
         }
-
         /* --- Nav Bar --- */
         .main-navbar {
             width: 100%;
@@ -64,14 +62,13 @@
             border-radius: 6px;
         }
         .nav-item.active { color: #1e2329; background-color: #fcd535; }
-
         /* --- İçerik --- */
         .container { 
-            background: var(--card); 
-            padding: 35px; 
-            border-radius: 16px; 
-            box-shadow: 0 8px 32px rgba(0,0,0,0.06); 
-            border: 2px solid var(--border);
+             background: var(--card); 
+             padding: 35px; 
+             border-radius: 16px; 
+             box-shadow: 0 8px 32px rgba(0,0,0,0.06); 
+             border: 2px solid var(--border);
             width: 100%;
             max-width: 850px;
             box-sizing: border-box;
@@ -79,7 +76,6 @@
         
         h1 { text-align: center; margin-top: 0; font-size: 24px; font-weight: 800; }
         p { text-align: center; color: var(--text-muted); margin-bottom: 25px; }
-
         /* --- Manuel Arama Çubuğu --- */
         .search-box {
             width: 100%;
@@ -95,13 +91,11 @@
         .search-box:focus {
             border-color: var(--gold);
         }
-
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 15px; }
         th { background-color: #f1f3f5; color: #474d57; font-weight: 700; }
         
         tbody tr:nth-child(even) { background-color: rgba(0, 0, 0, 0.01); }
-
         /* Rozet stilleri */
         .badge {
             padding: 4px 8px;
@@ -132,12 +126,12 @@
 </nav>
 
 <div class="container">
-    <h1>📅 Kilit Takvimi & Maksimum Arz Sorgulama</h1>
-    <p>Manuel olarak aramak istediğiniz coini yazın. Maksimum arz sınırını ve kilit açılım detaylarını anında görün.</p>
+    <h1>📅 Kilit Takvimi &amp; Maksimum Arz Sorgulama</h1>
+    <p>Sorgulamak istediğiniz coin adını girin. Maksimum arz ve kilit açılım detayları anında listelensin.</p>
     
     <!-- Manuel Arama Çubuğu -->
-    <input type="text" id="aramaKutusu" class="search-box" placeholder="🔍 Coin adı arayın... (Örn: BTC, SOL, ARB, SUI)">
-
+    <input type="text" id="aramaKutusu" class="search-box" placeholder="🔍 Coin adı yazın ve çekin... (Örn: STORJ, BTC, SOL, SUI)">
+    
     <table>
         <thead>
             <tr>
@@ -148,41 +142,74 @@
             </tr>
         </thead>
         <tbody id="kilit-verileri">
-            <!-- Veriler JavaScript ile buraya otomatik gelecek -->
+            <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Sorgulamak için yukarıya bir coin adı girin.</td></tr>
         </tbody>
     </table>
 </div>
 
 <script>
-    // --- MANUEL VERİ GİRİŞ ALANI ---
-    // İstediğin coini buraya kopyala-yapıştır mantığıyla ekleyebilirsin.
+    // --- MANUEL GENİŞLETİLMİŞ VERİ GİRİŞ ALANI ---
     const kriptoVeritabanı = [
+        { coin: "STORJ", arzDurumu: "Sınırlı (424.9 Milyon)", tarih: "Kilit Yok (Çoğu Dolaşımda)", miktar: "-" },
         { coin: "BTC", arzDurumu: "Sınırlı (21 Milyon)", tarih: "Kilit Yok (Madencilik)", miktar: "-" },
-        { coin: "ARB", arzDurumu: "Sınırlı (10 Milyar)", tarih: "16 Mart 2026", miktar: "92.65M ARB" },
-        { coin: "SUI", arzDurumu: "Sınırlı (10 Milyar)", tarih: "03 Nisan 2026", miktar: "64.19M SUI" },
-        { coin: "SOL", arzDurumu: "Sınırsız (Yıllık Enflasyon)", tarih: "Doğrusal (Linear Unlock)", miktar: "Günlük Dağıtım" },
         { coin: "ETH", arzDurumu: "Sınırsız (Dinamik Arz)", tarih: "Kilit Yok", miktar: "-" },
+        { coin: "SOL", arzDurumu: "Sınırsız (Yıllık Enflasyon)", tarih: "Doğrusal (Linear Unlock)", miktar: "Günlük Dağıtım" },
+        { coin: "BNB", arzDurumu: "Sınırlı (200 Milyon)", tarih: "Kilit Yok (Otomatik Yakım)", miktar: "-" },
+        { coin: "XRP", arzDurumu: "Sınırlı (100 Milyar)", tarih: "Her Ayın 1'i (Emanet)", miktar: "1.00B XRP" },
+        { coin: "ADA", arzDurumu: "Sınırlı (45 Milyar)", tarih: "Kilit Yok (Staking Dağıtımı)", miktar: "-" },
+        { coin: "AVAX", arzDurumu: "Sınırlı (720 Milyon)", tarih: "22 Mayıs 2026", miktar: "9.54M AVAX" },
+        { coin: "SUI", arzDurumu: "Sınırlı (10 Milyar)", tarih: "03 Nisan 2026", miktar: "64.19M SUI" },
+        { coin: "APT", arzDurumu: "Sınırsız (İlk Arz 1B+)", tarih: "12 Her Ay", miktar: "11.31M APT" },
+        { coin: "DOT", arzDurumu: "Sınırsız (Enflasyonist)", tarih: "Kilit Yok (Açık Enflasyon)", miktar: "-" },
+        { coin: "NEAR", arzDurumu: "Sınırsız (Yıllık %5)", tarih: "Doğrusal Dağıtım", miktar: "Sürekli Açılım" },
+        { coin: "LINK", arzDurumu: "Sınırlı (1 Milyar)", tarih: "Kilit Yok (Dolaşımda %60+)", miktar: "-" },
+        { coin: "TON", arzDurumu: "Sınırsız (Dinamik)", tarih: "Doğrusal (Doğrulayıcı Ödülleri)", miktar: "-" },
+        { coin: "TRX", arzDurumu: "Sınırsız (Deflasyonist)", tarih: "Kilit Yok", miktar: "-" },
+        { coin: "LTC", arzDurumu: "Sınırlı (84 Milyon)", tarih: "Kilit Yok (Yarılanma Var)", miktar: "-" },
+        { coin: "ATOM", arzDurumu: "Sınırsız (Dinamik %14)", tarih: "Kilit Yok", miktar: "-" },
+        { coin: "ALGO", arzDurumu: "Sınırlı (10 Milyar)", tarih: "Doğrusal Dağıtım", miktar: "Yıllık Enflasyon" },
+        { coin: "FTM", arzDurumu: "Sınırlı (3.175 Milyar)", tarih: "Kilit Yok (%95+ Dolaşımda)", miktar: "-" },
+        { coin: "EGLD", arzDurumu: "Sınırlı (31.4 Milyon)", tarih: "Kilit Yok", miktar: "-" },
+        { coin: "ICP", arzDurumu: "Sınırsız (Enflasyonist)", tarih: "11 Her Ay", miktar: "Doğrusal Çözülme" },
+        { coin: "SEI", arzDurumu: "Sınırlı (10 Milyar)", tarih: "15 Her Ay", miktar: "130M SEI" },
+        { coin: "INJ", arzDurumu: "Sınırlı (100 Milyon)", tarih: "Kilit Yok (Tamamı Dolaşımda)", miktar: "-" },
+        { coin: "TIA", arzDurumu: "Sınırsız (Yıllık %8)", tarih: "31 Ekim 2026", miktar: "Doğrusal Çözülme" },
+        { coin: "WLD", arzDurumu: "Sınırlı (10 Milyar)", tarih: "Her Gün Doğrusal", miktar: "6.62M WLD / Gün" },
+        { coin: "ARB", arzDurumu: "Sınırlı (10 Milyar)", tarih: "16 Mart 2026", miktar: "92.65M ARB" },
         { coin: "OP", arzDurumu: "Sınırlı (4.29 Milyar)", tarih: "29 Mart 2026", miktar: "31.4M OP" },
-        { coin: "AVAX", arzDurumu: "Sınırlı (720 Milyon)", tarih: "22 Mayıs 2026", miktar: "9.54M AVAX" }
+        { coin: "MATIC", arzDurumu: "Sınırlı (10 Milyar)", tarih: "Kilit Yok (POL Geçişi Tamam)", miktar: "-" },
+        { coin: "POL", arzDurumu: "Sınırsız (Yıllık %1)", tarih: "Kilit Yok (Yıllık Emisyon)", miktar: "-" },
+        { coin: "STRK", arzDurumu: "Sınırlı (10 Milyar)", tarih: "15 Her Ay", miktar: "64M STRK" },
+        { coin: "MANTA", arzDurumu: "Sınırlı (1 Milyar)", tarih: "18 Her Ay", miktar: "15M MANTA" },
+        { coin: "ZK", arzDurumu: "Sınırlı (21 Milyar)", tarih: "Doğrusal Çözülme", miktar: "Aylık Dağıtım" },
+        { coin: "UNI", arzDurumu: "Sınırlı (1 Milyar)", tarih: "Kilit Yok (Çoğu Dolaşımda)", miktar: "-" },
+        { coin: "ENA", arzDurumu: "Sınırlı (15 Milyar)", tarih: "Her Hafta Çarşamba", miktar: "Vesting Akışı" },
+        { coin: "DOGE", arzDurumu: "Sınırsız (Yıllık 5B Blok)", tarih: "Kilit Yok", miktar: "-" },
+        { coin: "SHIB", arzDurumu: "Sınırlı (999 Trilyon)", tarih: "Kilit Yok", miktar: "-" },
+        { coin: "PEPE", arzDurumu: "Sınırlı (420.6 Trilyon)", tarih: "Kilit Yok", miktar: "-" },
+        { coin: "WIF", arzDurumu: "Sınırlı (998 Milyon)", tarih: "Kilit Yok", miktar: "-" }
     ];
 
-    // İlk açılışta tüm tabloyu göster
-    tabloyuYazdir(kriptoVeritabanı);
-
-    // Tabloyu ekrana basan ana fonksiyon
-    function tabloyuYazdir(veriListesi) {
+    // Tabloyu ekrana basan ana fonksiyon (Hata giderildi: boşluk silindi)
+    function tabloyuYazdir(veriListesi, aramaYapildiMi) {
         const tabloGövdesi = document.getElementById('kilit-verileri');
         tabloGövdesi.innerHTML = ""; 
 
-        if (veriListesi.length === 0) {
-            tabloGövdesi.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Aradığınız coin veritabanında bulunamadı. Yeni veri ekleyebilirsiniz.</td></tr>`;
+        // Eğer arama kutusu boşsa başlangıç mesajını göster
+        if (!aramaYapildiMi) {
+            tabloGövdesi.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Sorgulamak için yukarıya bir coin adı girin.</td></tr>`;
             return;
         }
 
-        veriListesi.forEach(item => {
-            // Arz durumuna göre renkli rozet (badge) atayalım
-            const rozetTipi = item.arzDurumu.toLowerCase().includes("sınırsız") ? "badge-unlimited" : "badge-limited";
+        // Eğer arama yapıldı ama bulunamadıysa hata mesajı ver
+        if (veriListesi.length === 0) {
+            tabloGövdesi.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--red); font-weight: bold;">Aradığınız coin veritabanında bulunamadı.</td></tr>`;
+            return;
+        }
 
+        // Eşleşen coini tabloya ekle
+        veriListesi.forEach(item => {
+            const rozetTipi = item.arzDurumu.toLowerCase().includes("sınırsız") ? "badge-unlimited" : "badge-limited";
             let satir = `<tr>
                 <td><strong>${item.coin}</strong></td>
                 <td><span class="badge ${rozetTipi}">${item.arzDurumu}</span></td>
@@ -193,15 +220,20 @@
         });
     }
 
-    // Canlı Manuel Arama Fonksiyonu
+    // Canlı Manuel Arama Tetikleyicisi
     document.getElementById('aramaKutusu').addEventListener('input', function(e) {
         const arananKelime = e.target.value.toUpperCase().trim();
         
+        if (arananKelime === "") {
+            tabloyuYazdir([], false); // Arama boşsa sıfırla
+            return;
+        }
+
         const filtrelenmişVeri = kriptoVeritabanı.filter(item => {
             return item.coin.toUpperCase().includes(arananKelime);
         });
         
-        tabloyuYazdir(filtrelenmişVeri);
+        tabloyuYazdir(filtrelenmişVeri, true);
     });
 </script>
 
