@@ -80,7 +80,7 @@
             background-color: #ffffff; /* Beyaz Arka Plan */
             color: #1e2329; /* Koyu Gri / Siyah Metin */
             margin: 0;
-            padding: 0 0 20px 0; /* Üst padding navbar için sıfırlandı */
+            padding: 0 0 20px 0;
         }
         .container {
             max-width: 1200px;
@@ -205,6 +205,7 @@
         </div>
     </div>
 </nav>
+
 <div class="container">
     <div class="header">
         <h2>⏱️ YAVUZ TAŞPINAR COİN TEPE DİP BULMA PANELİ (USDT Pariteleri)</h2>
@@ -257,6 +258,7 @@
 </div>
 
 <script>
+    // Sayfa yüklenme aşaması bittiğinde güvenli başlatma bloğu
     document.addEventListener("DOMContentLoaded", function() {
         let currentPath = window.location.pathname.split("/").pop();
         if (currentPath === "" || currentPath === "index.html") {
@@ -271,130 +273,154 @@
                 link.classList.remove("active");
             }
         });
+
+        // Sayfa elementleri hafızaya tam otursun diye 100ms esneklik verip analizi tetikliyoruz
+        setTimeout(() => {
+            tumZamanlariAnalizEt();
+        }, 100); 
     });
-</script>
 
-<script>
-let fiyattakipInterval = null;
+    let fiyattakipInterval = null;
 
-async function tumZamanlariAnalizEt() {
-    const inputCoin = document.getElementById('coin-input').value.trim().toUpperCase();
-    const interval = document.getElementById('interval-select').value;
-    const loadingText = document.getElementById('loading-text');
-    
-    if(!inputCoin) {
-        alert("Lütfen geçerli bir coin kodu girin! (Örn: BTC)");
-        return;
-    }
-
-    const coin = inputCoin + "USDT";
-    loadingText.innerText = `${coin} verileri taranıyor...`;
-    document.getElementById('aktif-periyot-isim').innerText = `Aktif Parite: ${coin} | Periyot: ${interval.toUpperCase()}`;
-
-    if(fiyattakipInterval) clearInterval(fiyattakipInterval);
-
-    try {
-        await canlifiyatGuncelle(coin);
-        fiyattakipInterval = setInterval(() => canlifiyatGuncelle(coin), 5000);
-
-        let klines = [];
+    async function tumZamanlariAnalizEt() {
+        const coinInputEl = document.getElementById('coin-input');
+        const intervalSelectEl = document.getElementById('interval-select');
+        const loadingText = document.getElementById('loading-text');
         
-        if (interval === '45m') {
-            const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin}&interval=15m&limit=90`);
-            if (!res.ok) throw new Error("Veri çekilemedi");
-            const veri15m = await res.json();
-            klines = birlestir45Dakika(veri15m);
-        } else {
-            const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin}&interval=${interval}&limit=35`);
-            if (!res.ok) throw new Error("Veri çekilemedi");
-            klines = await res.json();
+        if (!coinInputEl || !intervalSelectEl) return;
+
+        const inputCoin = coinInputEl.value.trim().toUpperCase();
+        const interval = intervalSelectEl.value;
+        
+        if(!inputCoin) {
+            alert("Lütfen geçerli bir coin kodu girin! (Örn: BTC)");
+            return;
         }
 
-        analizCiktisiUret(klines);
-        loadingText.innerText = "Tarama tamamlandı!";
-    } catch (hata) {
-        console.error(hata);
+        const coin = inputCoin + "USDT";
+        if (loadingText) loadingText.innerText = `${coin} verileri taranıyor...`;
+        
+        const aktifPeriyotEl = document.getElementById('aktif-periyot-isim');
+        if (aktifPeriyotEl) aktifPeriyotEl.innerText = `Aktif Parite: ${coin} | Periyot: ${interval.toUpperCase()}`;
+
         if(fiyattakipInterval) clearInterval(fiyattakipInterval);
-        loadingText.innerText = "Hata oluştu!";
-        document.getElementById('canli-fiyat').innerText = "- USDT";
-        document.getElementById('tepe-donus').innerText = "- USDT";
-        document.getElementById('dip-donus').innerText = "- USDT";
-        document.getElementById('analiz-raporu').innerHTML = "<div class='log-line' style='color:#cf304a;'>Hata: Parite geçersiz veya Binance üzerinde USDT karşılığı yok.</div>";
-    }
-}
 
-async function canlifiyatGuncelle(coin) {
-    try {
-        const tickerRes = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${coin}`);
-        if(tickerRes.ok) {
-            const tickerData = await tickerRes.json();
-            const canliFiyat = parseFloat(tickerData.price);
-            document.getElementById('canli-fiyat').innerText = canliFiyat.toLocaleString('en-US') + " USDT";
-        }
-    } catch (e) {
-        console.log("Canlı fiyat güncellenemedi.");
-    }
-}
+        try {
+            await canlifiyatGuncelle(coin);
+            fiyattakipInterval = setInterval(() => canlifiyatGuncelle(coin), 5000);
 
-function birlestir45Dakika(veri15m) {
-    let birlesmisKlines = [];
-    for (let i = 0; i < veri15m.length - 2; i += 3) {
-        let mum1 = veri15m[i];
-        let mum2 = veri15m[i+1];
-        let mum3 = veri15m[i+2];
+            let klines = [];
+            
+            if (interval === '45m') {
+                const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin}&interval=15m&limit=90`);
+                if (!res.ok) throw new Error("Veri çekilemedi");
+                const veri15m = await res.json();
+                klines = birlestir45Dakika(veri15m);
+            } else {
+                const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin}&interval=${interval}&limit=35`);
+                if (!res.ok) throw new Error("Veri çekilemedi");
+                klines = await res.json();
+            }
 
-        let acilisZamani = mum1[0];
-        let acilis = parseFloat(mum1[1]);
-        let tepe = Math.max(parseFloat(mum1[2]), parseFloat(mum2[2]), parseFloat(mum3[2]));
-        let dip = Math.min(parseFloat(mum1[3]), parseFloat(mum2[3]), parseFloat(mum3[3]));
-        let kapanis = parseFloat(mum3[4]);
-
-        birlesmisKlines.push([acilisZamani, acilis, tepe, dip, kapanis]);
-    }
-    return birlesmisKlines;
-}
-
-function analizCiktisiUret(klines) {
-    let enYuksekTepe = 0;
-    let enDusukDip = Infinity;
-    let raporHtml = "";
-
-    for (let i = klines.length - 1; i >= 0; i--) {
-        const mum = klines[i];
-        const zaman = new Date(mum[0]).toLocaleString('tr-TR', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
-        const acilis = parseFloat(mum[1]);
-        const tepe = parseFloat(mum[2]);
-        const dip = parseFloat(mum[3]);
-        const kapanis = parseFloat(mum[4]);
-
-        if (tepe > enYuksekTepe) enYuksekTepe = tepe;
-        if (dip < enDusukDip) enDusukDip = dip;
-
-        let yukariFitilYuzdesi = ((tepe - Math.max(acilis, kapanis)) / tepe) * 100;
-        let asağıFitilYuzdesi = ((Math.min(acilis, kapanis) - dip) / dip) * 100;
-
-        if (yukariFitilYuzdesi > 0.35) {
-            raporHtml += `
-                <div class="log-line">
-                    <span>🔴 Fiyat <b class="text-red">${tepe.toLocaleString('en-US')} USDT</b> testinden sonra <b>AŞAĞI DÖNDÜ</b></span>
-                    <span class="time-badge">${zaman}</span>
-                </div>`;
-        }
-        if (asağıFitilYuzdesi > 0.35) {
-            raporHtml += `
-                <div class="log-line">
-                    <span>🟢 Fiyat <b class="text-green">${dip.toLocaleString('en-US')} USDT</b> testinden sonra <b>YUKARI DÖNDÜ</b></span>
-                    <span class="time-badge">${zaman}</span>
-                </div>`;
+            analizCiktisiUret(klines);
+            if (loadingText) loadingText.innerText = "Tarama tamamlandı!";
+        } catch (hata) {
+            console.error(hata);
+            if(fiyattakipInterval) clearInterval(fiyattakipInterval);
+            if (loadingText) loadingText.innerText = "Hata oluştu!";
+            
+            if(document.getElementById('canli-fiyat')) document.getElementById('canli-fiyat').innerText = "- USDT";
+            if(document.getElementById('tepe-donus')) document.getElementById('tepe-donus').innerText = "- USDT";
+            if(document.getElementById('dip-donus')) document.getElementById('dip-donus').innerText = "- USDT";
+            
+            const analizRaporuEl = document.getElementById('analiz-raporu');
+            if (analizRaporuEl) {
+                analizRaporuEl.innerHTML = "<div class='log-line' style='color:#cf304a;'>Hata: Parite geçersiz veya Binance üzerinde USDT karşılığı yok.</div>";
+            }
         }
     }
 
-    document.getElementById('tepe-donus').innerText = enYuksekTepe.toLocaleString('en-US') + " USDT";
-    document.getElementById('dip-donus').innerText = enDusukDip.toLocaleString('en-US') + " USDT";
-    document.getElementById('analiz-raporu').innerHTML = raporHtml || "<div class='log-line'>Seçilen periyotta %0.35 eşikli net dönüş fitili bulunamadı.</div>";
-}
+    async function canlifiyatGuncelle(coin) {
+        try {
+            const tickerRes = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${coin}`);
+            if(tickerRes.ok) {
+                const tickerData = await tickerRes.json();
+                const canliFiyat = parseFloat(tickerData.price);
+                const canliFiyatEl = document.getElementById('canli-fiyat');
+                if (canliFiyatEl) {
+                    canliFiyatEl.innerText = canliFiyat.toLocaleString('en-US') + " USDT";
+                }
+            }
+        } catch (e) {
+            console.log("Canlı fiyat güncellenemedi.");
+        }
+    }
 
-tumZamanlariAnalizEt();
+    function birlestir45Dakika(veri15m) {
+        let birlesmisKlines = [];
+        if (!veri15m || veri15m.length < 3) return birlesmisKlines;
+        
+        for (let i = 0; i < veri15m.length - 2; i += 3) {
+            let mum1 = veri15m[i];
+            let mum2 = veri15m[i+1];
+            let mum3 = veri15m[i+2];
+
+            let acilisZamani = mum1[0];
+            let acilis = parseFloat(mum1[1]);
+            let tepe = Math.max(parseFloat(mum1[2]), parseFloat(mum2[2]), parseFloat(mum3[2]));
+            let dip = Math.min(parseFloat(mum1[3]), parseFloat(mum2[3]), parseFloat(mum3[3]));
+            let kapanis = parseFloat(mum3[4]);
+
+            birlesmisKlines.push([acilisZamani, acilis, tepe, dip, kapanis]);
+        }
+        return birlesmisKlines;
+    }
+
+    function analizCiktisiUret(klines) {
+        if (!klines || klines.length === 0) return;
+        
+        let enYuksekTepe = 0;
+        let enDusukDip = Infinity;
+        let raporHtml = "";
+
+        for (let i = klines.length - 1; i >= 0; i--) {
+            const mum = klines[i];
+            const zaman = new Date(mum[0]).toLocaleString('tr-TR', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
+            const acilis = parseFloat(mum[1]);
+            const tepe = parseFloat(mum[2]);
+            const dip = parseFloat(mum[3]);
+            const kapanis = parseFloat(mum[4]);
+
+            if (tepe > enYuksekTepe) enYuksekTepe = tepe;
+            if (dip < enDusukDip) enDusukDip = dip;
+
+            let yukariFitilYuzdesi = ((tepe - Math.max(acilis, kapanis)) / tepe) * 100;
+            let asağıFitilYuzdesi = ((Math.min(acilis, kapanis) - dip) / dip) * 100;
+
+            if (yukariFitilYuzdesi > 0.35) {
+                raporHtml += `
+                    <div class="log-line">
+                        <span>🔴 Fiyat <b class="text-red">${tepe.toLocaleString('en-US')} USDT</b> testinden sonra <b>AŞAĞI DÖNDÜ</b></span>
+                        <span class="time-badge">${zaman}</span>
+                    </div>`;
+            }
+            if (asağıFitilYuzdesi > 0.35) {
+                raporHtml += `
+                    <div class="log-line">
+                        <span>🟢 Fiyat <b class="text-green">${dip.toLocaleString('en-US')} USDT</b> testinden sonra <b>YUKARI DÖNDÜ</b></span>
+                        <span class="time-badge">${zaman}</span>
+                    </div>`;
+            }
+        }
+
+        if(document.getElementById('tepe-donus')) document.getElementById('tepe-donus').innerText = enYuksekTepe.toLocaleString('en-US') + " USDT";
+        if(document.getElementById('dip-donus')) document.getElementById('dip-donus').innerText = enDusukDip.toLocaleString('en-US') + " USDT";
+        
+        const analizRaporuEl = document.getElementById('analiz-raporu');
+        if (analizRaporuEl) {
+            analizRaporuEl.innerHTML = raporHtml || "<div class='log-line'>Seçilen periyotta %0.35 eşikli net dönüş fitili bulunamadı.</div>";
+        }
+    }
 </script>
 </body>
 </html>
