@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kilit Takvimi - CoinSinyalPro</title>
     <style>
-        /* Standart Açık Tema Renk Paleti */
         :root {
             --bg: #ffffff;
             --card: #f8f9fa;
@@ -14,6 +13,8 @@
             --gold: #f3ba2f;
             --gold-btn: #fcd535;
             --border: #eaecef;
+            --green: #0ecb81;
+            --red: #f6465d;
         }
 
         body { 
@@ -26,13 +27,12 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
         }
 
-        /* --- Modern Nav Bar Tasarımı --- */
+        /* --- Nav Bar --- */
         .main-navbar {
             width: 100%;
-            background-color: #1e2329; /* Binance Koyu Gri */
+            background-color: #1e2329;
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -53,14 +53,8 @@
             font-size: 20px;
             font-weight: 800;
             text-decoration: none;
-            letter-spacing: 1px;
         }
-        .nav-links {
-            display: flex;
-            gap: 10px;
-            height: 100%;
-            align-items: center;
-        }
+        .nav-links { display: flex; gap: 10px; height: 100%; align-items: center; }
         .nav-item {
             color: #eaecef;
             text-decoration: none;
@@ -68,36 +62,10 @@
             font-weight: 600;
             padding: 10px 18px;
             border-radius: 6px;
-            transition: all 0.2s ease;
         }
-        .nav-item:hover {
-            color: #fcd535;
-            background-color: rgba(253, 213, 53, 0.1);
-        }
-        .nav-item.active {
-            color: #1e2329;
-            background-color: #fcd535;
-        }
+        .nav-item.active { color: #1e2329; background-color: #fcd535; }
 
-        @media (max-width: 992px) {
-            .nav-container {
-                flex-direction: column;
-                height: auto;
-                padding: 15px 10px;
-                gap: 15px;
-            }
-            .nav-links {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 5px;
-            }
-            .nav-item {
-                font-size: 13px;
-                padding: 8px 12px;
-            }
-        }
-        /* --- Nav Bar Bitiş --- */
-
+        /* --- İçerik --- */
         .container { 
             background: var(--card); 
             padding: 35px; 
@@ -109,103 +77,132 @@
             box-sizing: border-box;
         }
         
-        h1 { 
-            text-align: center; 
-            margin-top: 0; 
-            font-size: 24px; 
-            font-weight: 800; 
-            color: var(--text);
-            margin-bottom: 10px;
-        }
+        h1 { text-align: center; margin-top: 0; font-size: 24px; font-weight: 800; }
+        p { text-align: center; color: var(--text-muted); margin-bottom: 25px; }
 
-        p {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 15px;
-            margin-bottom: 25px;
-            font-weight: 500;
+        /* --- Manuel Arama Çubuğu --- */
+        .search-box {
+            width: 100%;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-box:focus {
+            border-color: var(--gold);
         }
 
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 15px; }
-        th { background-color: #f1f3f5; color: #474d57; font-weight: 700; font-size: 14px; }
-        td strong { color: var(--text); }
+        th { background-color: #f1f3f5; color: #474d57; font-weight: 700; }
         
-        /* Satırların hafifçe belli olması için alternatif arka plan */
-        tbody tr:nth-child(even) {
-            background-color: rgba(0, 0, 0, 0.01);
+        tbody tr:nth-child(even) { background-color: rgba(0, 0, 0, 0.01); }
+
+        /* Rozet stilleri */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
         }
+        .badge-limited { background-color: var(--green); }
+        .badge-unlimited { background-color: var(--red); }
     </style>
 </head>
 <body>
 
 <nav class="main-navbar">
     <div class="nav-container">
-        <a href="../" class="nav-logo">🎯 BALİNASAVAR PRO</a>
+        <a href="index.html" class="nav-logo">🎯 BALİNASAVAR PRO</a>
         <div class="nav-links">
-            <a href="../kilit-takvimi/" class="nav-item active">Kilit Takvimi</a>
-            <a href="../tepe-dip/" class="nav-item">Tepe-Dip Matrisi</a>
-            <a href="../kirilim/" class="nav-item">Kırılım Avcısı</a>
-            <a href="../kaldirac-analiz/" class="nav-item">Kaldıraç Analizi</a>
-            <a href="../gercekfiyat/" class="nav-item">Gerçek Fiyat</a>
-            <a href="../pilanlama/" class="nav-item">Planlama</a>
-            <a href="../detaybak/" class="nav-item">Detail Gör</a>
+            <a href="kilit-takvimi.html" class="nav-item active">Kilit Takvimi</a>
+            <a href="tepe-dip.html" class="nav-item">Tepe-Dip Matrisi</a>
+            <a href="kirilim.html" class="nav-item">Kırılım Avcısı</a>
+            <a href="kaldirac-analiz.html" class="nav-item">Kaldıraç Analizi</a>
+            <a href="gercekfiyat.html" class="nav-item">Gerçek Fiyat</a>
+            <a href="pilanlama.html" class="nav-item">Planlama</a>
+            <a href="detaybak.html" class="nav-item">Detail Gör</a>
         </div>
     </div>
 </nav>
 
 <div class="container">
-    <h1>📅 Kilit Takvimi Verileri</h1>
-    <p>Aşağıdaki token kilit açılım verileri yerel veritabanından dinamik olarak yüklenmektedir.</p>
+    <h1>📅 Kilit Takvimi & Maksimum Arz Sorgulama</h1>
+    <p>Manuel olarak aramak istediğiniz coini yazın. Maksimum arz sınırını ve kilit açılım detaylarını anında görün.</p>
     
+    <!-- Manuel Arama Çubuğu -->
+    <input type="text" id="aramaKutusu" class="search-box" placeholder="🔍 Coin adı arayın... (Örn: BTC, SOL, ARB, SUI)">
+
     <table>
         <thead>
             <tr>
                 <th>Coin Adı</th>
+                <th>Maksimum Arz Durumu</th>
                 <th>Kilit Açılım Tarihi</th>
-                <th>Miktar</th>
+                <th>Açılacak Miktar</th>
             </tr>
         </thead>
         <tbody id="kilit-verileri">
-            <tr>
-                <td colspan="3" style="text-align: center; color: var(--text-muted);">⏳ Veriler yükleniyor...</td>
-            </tr>
+            <!-- Veriler JavaScript ile buraya otomatik gelecek -->
         </tbody>
     </table>
 </div>
 
 <script>
-    // JSON dosyasını her zaman kendi klasöründen (göreceli olarak) çeker
-    fetch('./veriler.json')
-        .then(response => {
-            if (!response.ok) throw new Error("JSON dosyası bulunamadı!");
-            return response.json();
-        })
-        .then(data => {
-            const tabloGövdesi = document.getElementById('kilit-verileri');
-            tabloGövdesi.innerHTML = ""; // Yükleniyor yazısını temizle
+    // --- MANUEL VERİ GİRİŞ ALANI ---
+    // İstediğin coini buraya kopyala-yapıştır mantığıyla ekleyebilirsin.
+    const kriptoVeritabanı = [
+        { coin: "BTC", arzDurumu: "Sınırlı (21 Milyon)", tarih: "Kilit Yok (Madencilik)", miktar: "-" },
+        { coin: "ARB", arzDurumu: "Sınırlı (10 Milyar)", tarih: "16 Mart 2026", miktar: "92.65M ARB" },
+        { coin: "SUI", arzDurumu: "Sınırlı (10 Milyar)", tarih: "03 Nisan 2026", miktar: "64.19M SUI" },
+        { coin: "SOL", arzDurumu: "Sınırsız (Yıllık Enflasyon)", tarih: "Doğrusal (Linear Unlock)", miktar: "Günlük Dağıtım" },
+        { coin: "ETH", arzDurumu: "Sınırsız (Dinamik Arz)", tarih: "Kilit Yok", miktar: "-" },
+        { coin: "OP", arzDurumu: "Sınırlı (4.29 Milyar)", tarih: "29 Mart 2026", miktar: "31.4M OP" },
+        { coin: "AVAX", arzDurumu: "Sınırlı (720 Milyon)", tarih: "22 Mayıs 2026", miktar: "9.54M AVAX" }
+    ];
 
-            // Veritabanı boşsa kullanıcıyı bilgilendir
-            if (!data.kilit_takvimi || data.kilit_takvimi.length === 0) {
-                tabloGövdesi.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Gösterilebilecek kilit verisi bulunmuyor.</td></tr>`;
-                return;
-            }
+    // İlk açılışta tüm tabloyu göster
+    tabloyuYazdir(kriptoVeritabanı);
 
-            // JSON içindeki 'kilit_takvimi' listesini döngüye al
-            data.kilit_takvimi.forEach(item => {
-                let satir = `<tr>
-                    <td><strong>${item.coin}</strong></td>
-                    <td>${item.tarih}</td>
-                    <td><strong>${item.miktar}</strong></td>
-                </tr>`;
-                tabloGövdesi.innerHTML += satir;
-            });
-        })
-        .catch(error => {
-            document.getElementById('kilit-verileri').innerHTML = 
-                `<tr><td colspan="3" style="color:red; text-align: center; font-weight: bold;">❌ Hata: Veriler yüklenemedi! (veriler.json dosyasını kontrol edin)</td></tr>`;
-            console.error(error);
+    // Tabloyu ekrana basan ana fonksiyon
+    function tabloyuYazdir(veriListesi) {
+        const tabloGövdesi = document.getElementById('kilit-verileri');
+        tabloGövdesi.innerHTML = ""; 
+
+        if (veriListesi.length === 0) {
+            tabloGövdesi.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Aradığınız coin veritabanında bulunamadı. Yeni veri ekleyebilirsiniz.</td></tr>`;
+            return;
+        }
+
+        veriListesi.forEach(item => {
+            // Arz durumuna göre renkli rozet (badge) atayalım
+            const rozetTipi = item.arzDurumu.toLowerCase().includes("sınırsız") ? "badge-unlimited" : "badge-limited";
+
+            let satir = `<tr>
+                <td><strong>${item.coin}</strong></td>
+                <td><span class="badge ${rozetTipi}">${item.arzDurumu}</span></td>
+                <td>${item.tarih}</td>
+                <td><strong>${item.miktar}</strong></td>
+            </tr>`;
+            tabloGövdesi.innerHTML += satir;
         });
+    }
+
+    // Canlı Manuel Arama Fonksiyonu
+    document.getElementById('aramaKutusu').addEventListener('input', function(e) {
+        const arananKelime = e.target.value.toUpperCase().trim();
+        
+        const filtrelenmişVeri = kriptoVeritabanı.filter(item => {
+            return item.coin.toUpperCase().includes(arananKelime);
+        });
+        
+        tabloyuYazdir(filtrelenmişVeri);
+    });
 </script>
 
 </body>
