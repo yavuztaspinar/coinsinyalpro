@@ -4,9 +4,79 @@
     <meta charset="UTF-8">
     <title>Gelişmiş Kripto Analiz Motoru</title>
     <style>
+        /* --- Modern Nav Bar Tasarımı Başlangıcı --- */
+        .main-navbar {
+            width: 100%;
+            background-color: #1e2329; /* Binance Koyu Gri */
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .nav-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        .nav-logo {
+            color: #fcd535;
+            font-size: 20px;
+            font-weight: 800;
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 10px;
+            height: 100%;
+            align-items: center;
+        }
+        .nav-item {
+            color: #eaecef;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 600;
+            padding: 10px 18px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        .nav-item:hover {
+            color: #fcd535;
+            background-color: rgba(253, 213, 53, 0.1);
+        }
+        .nav-item.active {
+            color: #1e2329;
+            background-color: #fcd535;
+        }
+
+        @media (max-width: 992px) {
+            .nav-container {
+                flex-direction: column;
+                height: auto;
+                padding: 15px 10px;
+                gap: 15px;
+            }
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 5px;
+            }
+            .nav-item {
+                font-size: 13px;
+                padding: 8px 12px;
+            }
+        }
+        /* --- Modern Nav Bar Tasarımı Bitişi --- */
+
         :root { --bg: #0b0e11; --card: #181a20; --text: #eaecef; --gold: #fcd535; --green: #0ecb81; --red: #f6465d; --border: #2b3139; }
-        body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 1000px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 0 0 20px 0; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 1000px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-sizing: border-box; }
         h2 { text-align: center; color: var(--gold); }
         .control-panel { display: flex; gap: 10px; margin-bottom: 20px; }
         input, select, button { padding: 10px; background: #2b3139; border: 1px solid var(--border); color: #fff; border-radius: 4px; }
@@ -17,6 +87,21 @@
     </style>
 </head>
 <body>
+
+<nav class="main-navbar">
+    <div class="nav-container">
+        <a href="index.html" class="nav-logo">🎯 BALİNASAVAR PRO</a>
+        <div class="nav-links" id="mainNavLinks">
+            <a href="index.html" class="nav-item">Dip Avcısı</a>
+            <a href="tepe-dip.html" class="nav-item">Tepe-Dip Matrisi</a>
+            <a href="kirilim.html" class="nav-item">Kırılım Avcısı</a>
+            <a href="kaldirac-analiz.html" class="nav-item">Kaldıraç Analizi</a>
+            <a href="gercekfiyat.html" class="nav-item">Gerçek Fiyat</a>
+            <a href="pilanlama.html" class="nav-item">Planlama</a>
+            <a href="detaybak.html" class="nav-item">Detail Gör</a>
+        </div>
+    </div>
+</nav>
 <div class="container">
     <h2>📊 YAVUZ TAŞPINAR KALDIRAÇ ORANLARI</h2>
     <div class="control-panel">
@@ -29,6 +114,24 @@
         <table><thead><tr><th>#</th><th>İndikatör</th><th>Değer</th><th>Sinyal</th></tr></thead><tbody id="indicatorRows"></tbody></table>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let currentPath = window.location.pathname.split("/").pop();
+        if (currentPath === "" || currentPath === "index.html") {
+            currentPath = "index.html";
+        }
+        const navLinks = document.querySelectorAll("#mainNavLinks .nav-item");
+        navLinks.forEach(link => {
+            const linkPath = link.getAttribute("href");
+            if (currentPath === linkPath) {
+                link.classList.add("active");
+            } else {
+                link.classList.remove("active");
+            }
+        });
+    });
+</script>
 
 <script>
     const SMA = (d, p) => d.map((_, i) => i < p - 1 ? 0 : d.slice(i - p + 1, i + 1).reduce((a, b) => a + b, 0) / p);
