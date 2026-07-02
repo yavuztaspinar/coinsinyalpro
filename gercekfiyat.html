@@ -23,7 +23,7 @@
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background-color: var(--bg);
             margin: 0;
-            padding: 0 0 40px 0; /* Üst padding navbar için sıfırlandı */
+            padding: 0 0 40px 0;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -33,7 +33,7 @@
         /* --- Modern Nav Bar Tasarımı --- */
         .main-navbar {
             width: 100%;
-            background-color: #1e2329; /* Binance Koyu Gri */
+            background-color: #1e2329;
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -297,7 +297,7 @@
         
         <input type="text" id="coinTickerInput" value="BTCUSDT" placeholder="Örn: BTCUSDT, SOLUSDT" style="margin-top: 10px; display: none;">
         
-        <button class="api-btn" onclick="binanceVerisiniCek()">🔄 BINANCE'DEN ANLIK FİYAT ÇEK</button>
+        <button class="api-btn" onclick="binanceVerisiniCek() + hesaplaTetikle()">🔄 BINANCE'DEN ANLIK FİYAT ÇEK</button>
         <span id="apiStatus">Durum: Bekleniyor...</span>
     </div>
 
@@ -358,8 +358,9 @@
 </div>
 
 <script>
-window.onload = function() {
-    binanceVerisiniCek();
+window.onload = async function() {
+    await binanceVerisiniCek();
+    hesapla();
 };
 
 function tickerGuncelle(deger) {
@@ -371,6 +372,11 @@ function tickerGuncelle(deger) {
         inputAlani.style.display = 'none';
         inputAlani.value = deger;
     }
+}
+
+async function hesaplaTetikle() {
+    // Fiyat çekme butonuna tıklandığında senkronizasyonu bozmamak için küçük bir gecikmeyle hesaplar
+    setTimeout(hesapla, 800);
 }
 
 async function binanceVerisiniCek() {
@@ -390,7 +396,8 @@ async function binanceVerisiniCek() {
     statusText.style.color = "var(--text-muted)";
     
     try {
-        const url = `https://api.binance.com/api/v3/ticker/price?symbol=${ticker}`;
+        // Tarayıcı uyumluluğu için api3 uç noktası seçildi
+        const url = `https://api3.binance.com/api/v3/ticker/price?symbol=${ticker}`;
         const response = await fetch(url);
         
         if (!response.ok) {
@@ -422,6 +429,14 @@ async function binanceVerisiniCek() {
                 document.getElementById('circulating').value = 14900000; 
                 document.getElementById('maxSupply').value = 16000000;
                 document.getElementById('tvl').value = 11000000000;
+            } else {
+                // Manuel giriş modunda eski coinin verilerinin kalıp indikatörü bozması engellendi
+                document.getElementById('circulating').value = ""; 
+                document.getElementById('maxSupply').value = "";
+                document.getElementById('tvl').value = "";
+                statusText.innerText = `Durum: Fiyat başarıyla alındı. Lütfen Arz ve TVL alanlarını doldurun.`;
+                statusText.style.color = "orange";
+                return;
             }
 
             statusText.innerText = `Durum: Başarılı! Binance canlı fiyatı güncellendi.`;
@@ -443,18 +458,20 @@ function hesapla() {
     const maksArz = parseFloat(document.getElementById('maxSupply').value);
     const tvl = parseFloat(document.getElementById('tvl').value);
 
+    // Form alanları tam doldurulmadan analiz kutusunun çökmesi engellendi
     if (!tvl || tvl <= 0 || !fiyat || fiyat <= 0 || !dolasanArz || dolasanArz <= 0) {
-        alert("Lütfen tüm alanlara geçerli pozitif değerler girin!");
+        document.getElementById('resultsBox').style.display = 'none';
         return;
     }
 
     const marketCap = fiyat * dolasanArz;
-    const fdv = fiyat * maksArz;
+    // Maksimum arz girilmemişse veya 0 ise FDV hesaplamasında hata çıkmaması sağlandı
+    const fdv = (maksArz && maksArz > 0) ? (fiyat * maksArz) : marketCap;
     const oran = marketCap / tvl;
 
     document.getElementById('resultsBox').style.display = 'block';
     document.getElementById('resMarketCap').innerText = '$' + marketCap.toLocaleString('en-US', {maximumFractionDigits: 0});
-    document.getElementById('resFDV').innerText = '$' + fdv.toLocaleString('en-US', {maximumFractionDigits: 0});
+    document.getElementById('resFDV').innerText = (maksArz && maksArz > 0) ? '$' + fdv.toLocaleString('en-US', {maximumFractionDigits: 0}) : "Sınırsız / Belirtilmemiş";
     document.getElementById('resRatio').innerText = oran.toFixed(2);
 
     const dipOrani = 0.3;
