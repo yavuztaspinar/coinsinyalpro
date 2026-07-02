@@ -292,6 +292,8 @@
         }
 
         const pairLower = `${coin.toLowerCase()}usdt`;
+        
+        // WebSocket bağlantısı başlatılıyor
         socket = new WebSocket(`wss://stream.binance.com:9443/ws/${pairLower}@kline_${timeframe}`);
 
         let simulatedHistoryCloses = [];
@@ -306,7 +308,7 @@
                 const highPrice = parseFloat(kline.h);
                 const lowPrice = parseFloat(kline.l);
 
-                // Gizlenen arayüzü ilk veri geldiğinde görünür yapıyoruz
+                // Veri akmaya başladığı an arayüz panelini açıyoruz
                 infoMessage.innerText = "Canlı veriler başarıyla işleniyor.";
                 resultArea.style.display = "block";
 
@@ -342,4 +344,6 @@
                 };
 
                 // 1. RSI
-                const rsiVal = calculateRSI(simulatedHistoryCloses,
+                const rsiVal = calculateRSI(simulatedHistoryCloses, 14);
+                let rsiSignal = "NÖTR";
+                if(rsiVal > 65) rsiSignal = "SAT"; else if(rsiVal < 35) rsiSignal = "AL";
