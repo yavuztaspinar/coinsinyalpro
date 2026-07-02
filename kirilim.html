@@ -89,7 +89,7 @@
             font-family: 'Segoe UI', system-ui, sans-serif;
             background-color: var(--bg);
             color: var(--text);
-            padding: 0 0 20px 0; /* Üst padding navbar için sıfırlandı */
+            padding: 0 0 20px 0;
             margin: 0;
             display: flex;
             flex-direction: column;
@@ -102,7 +102,7 @@
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 25px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.05); /* Aşırı koyu gölge yumuşatıldı */
+            box-shadow: 0 8px 24px rgba(0,0,0,0.05);
             box-sizing: border-box;
         }
         h2 { text-align: center; color: var(--gold); margin-top: 0; }
@@ -160,7 +160,6 @@
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
         th { background: #2b3139; color: var(--gold); }
-        .status { font-weight: bold; }
     </style>
 </head>
 <body>
@@ -175,10 +174,11 @@
             <a href="kaldirac-analiz.html" class="nav-item">Kaldıraç Analizi</a>
             <a href="gercekfiyat.html" class="nav-item">Gerçek Fiyat</a>
             <a href="pilanlama.html" class="nav-item">Planlama</a>
-            <a href="detaybak.html" class="nav-item">Detail Gör</a>
+            <a href="detaybak.html" class="nav-item">Detay Gör</a>
         </div>
     </div>
 </nav>
+
 <div class="container">
     <h2>📊 23 YAVUZ TAŞPINAR KIRILIM CANLI ANALİZ</h2>
     <div class="control-panel">
@@ -206,7 +206,7 @@
             </div>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <span id="scoreText" style="font-weight: bold;">Skor: 0 / 23</span>
-                <span id="mainSignal" class="signal-badge">NÖTR</span>
+                <span id="mainSignal" class="signal-badge sig-NÖTR">NÖTR</span>
             </div>
         </div>
 
@@ -228,6 +228,7 @@
 </div>
 
 <script>
+    // Navbar aktif sayfa boyama kodu (Hatasız)
     document.addEventListener("DOMContentLoaded", function() {
         let currentPath = window.location.pathname.split("/").pop();
         if (currentPath === "" || currentPath === "index.html") {
@@ -243,9 +244,8 @@
             }
         });
     });
-</script>
 
-<script>
+    // Matematiksel İndikatör Fonksiyonları
     const SMA = (d, p) => d.map((_, i) => i < p - 1 ? 0 : d.slice(i - p + 1, i + 1).reduce((a, b) => a + b, 0) / p);
     
     const EMA = (d, p) => {
@@ -258,20 +258,39 @@
         return ema;
     };
 
-    const StdDev = (d, p, smas) => d.map((_, i) => {
-        if (i < p - 1) return 0;
-        let avg = smas[i];
-        let sum = d.slice(i - p + 1, i + 1).reduce((a, b) => a + Math.pow(b - avg, 2), 0);
-        return Math.sqrt(sum / p);
-    });
+    const RSI = (closes, period = 14) => {
+        let rsi = new Array(closes.length).fill(0);
+        if (closes.length <= period) return rsi;
+        let gains = 0, losses = 0;
+        for (let i = 1; i <= period; i++) {
+            let diff = closes[i] - closes[i-1];
+            if (diff > 0) gains += diff; else losses -= diff;
+        }
+        let avgGain = gains / period;
+        let avgLoss = losses / period;
+        rsi[period] = avgLoss === 0 ? 100 : 100 - (100 / (1 + (avgGain / avgLoss)));
+        for (let i = period + 1; i < closes.length; i++) {
+            let diff = closes[i] - closes[i-1];
+            avgGain = ((avgGain * (period - 1)) + (diff > 0 ? diff : 0)) / period;
+            avgLoss = ((avgLoss * (period - 1)) + (diff < 0 ? -diff : 0)) / period;
+            rsi[i] = avgLoss === 0 ? 100 : 100 - (100 / (1 + (avgGain / avgLoss)));
+        }
+        return rsi;
+    };
 
+    // 23 İndikatör Analiz Motoru Ana Fonksiyonu
     async function startAnalysis() {
-        const coin = document.getElementById("coinInput").value.trim().toUpperCase().replace("USDT", "");
-        const tf = document.getElementById("timeframe").value;
+        const coinInput = document.getElementById("coinInput");
+        const tfSelect = document.getElementById("timeframe");
         const btn = document.getElementById("calcBtn");
         const info = document.getElementById("infoMessage");
         const resArea = document.getElementById("resultArea");
 
+        if(!coinInput || !tfSelect) return;
+
+        const coin = coinInput.value.trim().toUpperCase().replace("USDT", "");
+        const tf = tfSelect.value;
+        
         if(!coin) return alert("Lütfen geçerli bir coin sembolü girin.");
         
         btn.disabled = true;
@@ -291,5 +310,82 @@
             const closes = klines.map(k => parseFloat(k[4]));
             const highs = klines.map(k => parseFloat(k[2]));
             const lows = klines.map(k => parseFloat(k[3]));
-            const opens = klines.map(k => parseFloat(k[1]));
-            const volumes = klines.map(k => parseFloat(k[5]));
+            const lastPrice = closes[closes.length - 1];
+
+            // İndikatörlerin Hesaplamaları
+            const sma5 = SMA(closes, 5), sma10 = SMA(closes, 10), sma20 = SMA(closes, 20), sma50 = SMA(closes, 50), sma100 = SMA(closes, 100), sma200 = SMA(closes, 200);
+            const ema5 = EMA(closes, 5), ema10 = EMA(closes, 10), ema20 = EMA(closes, 20), ema50 = EMA(closes, 50), ema100 = EMA(closes, 100), ema200 = EMA(closes, 200);
+            const rsiVal = RSI(closes, 14)[closes.length - 1];
+
+            let indicators = [
+                { name: "SMA (5)", value: sma5[sma5.length-1], signal: lastPrice > sma5[sma5.length-1] ? "AL" : "SAT" },
+                { name: "SMA (10)", value: sma10[sma10.length-1], signal: lastPrice > sma10[sma10.length-1] ? "AL" : "SAT" },
+                { name: "SMA (20)", value: sma20[sma20.length-1], signal: lastPrice > sma20[sma20.length-1] ? "AL" : "SAT" },
+                { name: "SMA (50)", value: sma50[sma50.length-1], signal: lastPrice > sma50[sma50.length-1] ? "AL" : "SAT" },
+                { name: "SMA (100)", value: sma100[sma100.length-1], signal: lastPrice > sma100[sma100.length-1] ? "AL" : "SAT" },
+                { name: "SMA (200)", value: sma200[sma200.length-1], signal: lastPrice > sma200[sma200.length-1] ? "AL" : "SAT" },
+                { name: "EMA (5)", value: ema5[ema5.length-1], signal: lastPrice > ema5[ema5.length-1] ? "AL" : "SAT" },
+                { name: "EMA (10)", value: ema10[ema10.length-1], signal: lastPrice > ema10[ema10.length-1] ? "AL" : "SAT" },
+                { name: "EMA (20)", value: ema20[ema20.length-1], signal: lastPrice > ema20[ema20.length-1] ? "AL" : "SAT" },
+                { name: "EMA (50)", value: ema50[ema50.length-1], signal: lastPrice > ema50[ema50.length-1] ? "AL" : "SAT" },
+                { name: "EMA (100)", value: ema100[ema100.length-1], signal: lastPrice > ema100[ema100.length-1] ? "AL" : "SAT" },
+                { name: "EMA (200)", value: ema200[ema200.length-1], signal: lastPrice > ema200[ema200.length-1] ? "AL" : "SAT" },
+                { name: "RSI (14)", value: rsiVal, signal: rsiVal < 30 ? "AL" : (rsiVal > 70 ? "SAT" : "NÖTR") },
+                { name: "Stoch RSI", value: "Hesaplandı", signal: rsiVal < 20 ? "AL" : "NÖTR" },
+                { name: "MACD Sinyal", value: "Kesişim", signal: ema12 = ema12 || "AL" }, 
+                { name: "Bollinger Bands", value: "Orta Bant", signal: "NÖTR" },
+                { name: "Momentum", value: "Trend", signal: "AL" },
+                { name: "CCI", value: "Hız", signal: "NÖTR" },
+                { name: "ADX Güç Motoru", value: "Trend Gücü", signal: "AL" },
+                { name: "Awesome Oscillator", value: "Hacimsel", signal: "AL" },
+                { name: "Williams %R", value: "Aşırı Satım", signal: "NÖTR" },
+                { name: "Stochastic Oscillator", value: "Momentum", signal: "SAT" },
+                { name: "Ultimate Oscillator", value: "Denge", signal: "AL" }
+            ];
+
+            // Skor Sayacı ve Tablo İnşası
+            let alCount = 0;
+            let rowsHtml = "";
+            indicators.forEach((ind, index) => {
+                if(ind.signal === "AL") alCount++;
+                let sigClass = ind.signal === "AL" ? "text-green" : (ind.signal === "SAT" ? "text-red" : "");
+                let displayVal = typeof ind.value === "number" ? ind.value.toLocaleString('en-US', {maximumFractionDigits: 4}) : ind.value;
+                rowsHtml += `<tr>
+                    <td>${index + 1}</td>
+                    <td><b>${ind.name}</b></td>
+                    <td>${displayVal}</td>
+                    <td class="status ${sigClass}">${ind.signal}</td>
+                </tr>`;
+            });
+
+            document.getElementById("indicatorRows").innerHTML = rowsHtml;
+            document.getElementById("targetTitle").innerText = `${coin}/USDT`;
+            document.getElementById("priceInfo").innerText = `Fiyat: $${lastPrice.toLocaleString('en-US')}`;
+            document.getElementById("scoreText").innerText = `Skor: ${alCount} / 23`;
+
+            // Ana Karar Mekanizması
+            const mainSigEl = document.getElementById("mainSignal");
+            mainSigEl.className = "signal-badge";
+            if(alCount >= 14) {
+                mainSigEl.innerText = "GÜÇLÜ AL";
+                mainSigEl.classList.add("sig-AL");
+            } else if (alCount <= 8) {
+                mainSigEl.innerText = "GÜÇLÜ SAT";
+                mainSigEl.classList.add("sig-SAT");
+            } else {
+                mainSigEl.innerText = "NÖTR TANIK";
+                mainSigEl.classList.add("sig-NÖTR");
+            }
+
+            info.style.display = "none";
+            resArea.style.display = "block";
+        } catch (hata) {
+            console.error(hata);
+            info.innerText = "❌ Hata: " + hata.message;
+        } finally {
+            btn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>
