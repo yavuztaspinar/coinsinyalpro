@@ -4,249 +4,141 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Binance Canlı Token Analiz & İndikatör Hesaplayıcı</title>
-    <style>
-        /* Renk Paleti Tanımlamaları */
-        :root { 
-            --bg: #121824;          /* Soft Gece Mavisi Arka Plan */
-            --card: #1c2434;        /* Kartlar için hafif açık soft mavi */
-            --navbar: #161d2a;      /* Navigasyon bar için uyumlu ton */
-            --input-bg: #242f47;    /* Girdi alanlarının iç rengi */
-            --border: #2d384e;      /* Çizgiler ve kenarlıklar */
-            --text: #eaecef;        /* Ana metin rengi */
-            --text-muted: #909bb0;  /* Yardımcı metin rengi */
-            --gold: #fcd535;        /* Binance Sarısı */
-            --green: #0ecb81; 
-            --red: #f6465d; 
+     :root {
+            --bg: #f4f7fc; 
+            --card: #ffffff; 
+            --text: #1e293b; 
+            --gold: #fcd535; /* Canlı Binance Sarısı */
+            --green: #0ea5e9; 
+            --red: #ef4444;
+            --blue: #3b82f6; 
+            --border: #e2e8f0; 
         }
-
-        /* --- Modern Nav Bar Tasarımı Başlangıcı --- */
-        .main-navbar {
-            width: 100%;
-            background-color: var(--navbar);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            margin-bottom: 30px;
-            border-bottom: 1px solid var(--border);
-        }
-        .nav-container {
-            max-width: 1600px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 70px;
-            padding: 0 20px;
-            box-sizing: border-box;
-        }
-        .nav-logo {
-            color: var(--gold);
-            font-size: 20px;
-            font-weight: 800;
-            text-decoration: none;
-            letter-spacing: 1px;
-        }
-        .nav-links {
-            display: flex;
-            gap: 10px;
-            height: 100%;
-            align-items: center;
-        }
-        .nav-item {
-            color: var(--text);
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: 600;
-            padding: 10px 18px;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-        }
-        .nav-item:hover {
-            color: var(--gold);
-            background-color: rgba(253, 213, 53, 0.1);
-        }
-        .nav-item.active {
-            color: var(--bg);
-            background-color: var(--gold);
-        }
-
-        @media (max-width: 992px) {
-            .nav-container {
-                flex-direction: column;
-                height: auto;
-                padding: 15px 10px;
-                gap: 15px;
-            }
-            .nav-links {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 5px;
-            }
-            .nav-item {
-                font-size: 13px;
-                padding: 8px 12px;
-            }
-        }
-        /* --- Modern Nav Bar Tasarımı Bitişi --- */
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background-color: var(--bg);
             color: var(--text);
-            margin: 0;
-            padding: 0 0 40px 0;
+            padding: 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            margin: 0;
         }
-        .container {
-            background-color: var(--card);
-            border: 1px solid var(--border);
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-            max-width: 500px;
+        .scanner-box {
             width: 100%;
-            box-sizing: border-box;
+            max-width: 1400px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px; 
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(148, 163, 184, 0.1); 
         }
-        h2 {
-            text-align: center;
-            color: var(--gold);
-            margin-bottom: 5px;
-        }
-        .subtitle {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 14px;
+        h2 { text-align: center; color: #1e3a8a; margin-top: 0; font-size: 22px; font-weight: 700; }
+        .grid-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
             margin-bottom: 25px;
-        }
-        .input-group {
-            margin-bottom: 15px;
-            position: relative;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-        input, select {
-            width: 100%;
-            padding: 10px;
-            background-color: var(--input-bg);
-            border: 1px solid var(--border);
-            color: #fff;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--gold);
-        }
-        .coin-select-box {
-            background-color: #1e283d;
-            border: 2px dashed var(--gold);
+            background: #edf2f9; 
             padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
         }
-        .api-btn {
-            background-color: var(--gold);
-            margin-top: 10px;
-            width: 100%;
-            color: var(--bg);
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 12px; color: #475569; font-weight: bold; }
+        select, input {
             padding: 12px;
-            border: none;
-            border-radius: 6px;
-            font-size: 15px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.2s;
-        }
-        .api-btn:hover {
-            background-color: #dcb014;
-        }
-        button.calc-btn {
-            width: 100%;
-            color: var(--bg);
-            padding: 14px;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-            font-weight: bold;
-            background-color: var(--gold);
-            transition: background-color 0.2s;
-            margin-top: 10px;
-        }
-        button.calc-btn:hover {
-            background-color: #dcb014;
-        }
-        .results {
-            margin-top: 25px;
-            border-top: 2px solid var(--border);
-            padding-top: 20px;
-        }
-        .result-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            font-size: 16px;
-        }
-        .value {
-            font-weight: bold;
-            color: var(--text);
-        }
-        .indicator-box {
-            margin-top: 15px;
-            background: var(--input-bg);
-            border-radius: 10px;
-            height: 24px;
-            overflow: hidden;
-            position: relative;
-        }
-        .indicator-bar {
-            height: 100%;
-            width: 0%;
-            transition: width 0.5s ease, background-color 0.5s ease;
-        }
-        .status-box {
-            margin-top: 15px;
-            padding: 15px;
+            background: #ffffff; 
+            border: 1px solid #cbd5e1;
+            color: #1e293b;
             border-radius: 8px;
-            text-align: center;
-            font-size: 17px;
-            font-weight: 900;
-            letter-spacing: 1px;
-        }
-        .zone-dip { background-color: var(--green); color: white; } 
-        .zone-fair { background-color: #ffc107; color: var(--bg); } 
-        .zone-tepe { background-color: var(--red); color: white; } 
-        
-        #apiStatus {
             font-size: 13px;
-            color: var(--text-muted);
-            margin-top: 5px;
-            display: block;
-            text-align: center;
+            outline: none;
+            transition: all 0.2s;
+            height: 45px;
+            box-sizing: border-box;
         }
-        .target-box {
-            background-color: #1e283d;
-            border: 1px solid var(--border);
-            border-radius: 6px;
+        select:focus, input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+        button {
             padding: 12px;
-            margin-top: 15px;
-        }
-        .target-title {
+            background: var(--gold); /* Arka plan dikkat çeken canlı sarı oldu */
+            color: #000000; /* Siyah yazı sayesinde sarı üzerinde net okunur */
             font-weight: bold;
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px; /* Yazı boyutu okunurluk için hafif büyütüldü */
+            outline: none;
+            width: 100%; 
+            height: 45px; 
+            box-sizing: border-box;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(252, 213, 53, 0.2); /* Hafif sarı parlama efekti */
         }
+        button:hover { 
+            background: #f3ba2f; /* Üzerine gelince biraz daha koyu sarı tonu */
+            transform: translateY(-1px); 
+            box-shadow: 0 6px 16px rgba(252, 213, 53, 0.3);
+        }
+        button:disabled { background: #94a3b8; color: #cbd5e1; cursor: not-allowed; box-shadow: none; }
+        .status-panel {
+            text-align: center;
+            margin: 20px 0;            
+            font-weight: 500;
+            color: #334155;
+        }
+        .bar-container {
+            width: 100%;
+            background: #e2e8f0;
+            height: 6px;
+            border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+            display: none;
+        }
+        .bar-inner { width: 0%; height: 100%; background: var(--blue); transition: width 0.1s ease-out; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; display: none; }
+        th, td { padding: 14px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: #f1f5f9; color: #1e3a8a; font-size: 13px; font-weight: 600; }
+        .match-row { animation: fadeIn 0.3s ease-in-out; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; margin-right: 4px; display: inline-block; font-weight: bold; }
+        .badge-rsi { background: rgba(14, 165, 233, 0.1); color: #0284c7; }
+        .badge-macd { background: rgba(223, 179, 0, 0.1); color: #b59100; }
+        .badge-vol { background: rgba(59, 130, 246, 0.1); color: var(--blue); }
+        .badge-dip { background: rgba(239, 68, 68, 0.1); color: var(--red); }
+        .badge-div { background: rgba(6, 182, 212, 0.1); color: #0891b2; }
+        .badge-confirm { background: rgba(147, 51, 234, 0.1); color: #7c3aed; border: 1px solid #7c3aed; }
+        .badge-unconfirmed { background: rgba(100, 116, 139, 0.1); color: #64748b; }
+        .badge-trade { font-size: 12px; letter-spacing: 0.5px; border: 1px solid transparent; }
+        .trade-buy { background: rgba(34, 197, 94, 0.15); color: #16a34a; border-color: #22c55e; }
+        .trade-sell { background: rgba(239, 68, 68, 0.15); color: #dc2626; border-color: var(--red); }
+        .trade-hold { background: rgba(100, 116, 139, 0.15); color: #64748b; }
+        .tv-link { color: var(--blue); text-decoration: none; font-weight: bold; font-size: 12px; }
+        .tv-link:hover { text-decoration: underline; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+
+    </style><!-- NAV BAR BAŞLANGICI -->
+<nav class="main-navbar">
+    <div class="nav-container">
+        <a href="index.html" class="nav-logo">🎯 BALİNASAVAR PRO</a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-item active">Dip Avcısı</a>
+            <a href="tepe-dip.html" class="nav-item">Tepe-Dip Matrisi</a>
+            <a href="kirilim.html" class="nav-item">Kırılım Avcısı</a>
+            <a href="kaldirac-analiz.html" class="nav-item">Kaldıraç Analizi</a>
+            <a href="gercekfiyat.html" class="nav-item">Gerçek Fiyat</a>
+            <a href="pilanlama.html" class="nav-item">Planlama</a>
+            <a href="detaybak.html" class="nav-item">Detay Gör</a>
+        </div>
+    </div>
+</nav>
+<!-- NAV BAR BİTİŞİ -->
+
+
     </style>
 </head>
 <body>
