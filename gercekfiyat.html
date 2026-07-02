@@ -5,30 +5,114 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Binance Canlı Token Analiz & İndikatör Hesaplayıcı</title>
     <style>
+        /* --- Modern Nav Bar Tasarımı Başlangıcı --- */
+        .main-navbar {
+            width: 100%;
+            background-color: #1e2329; /* Binance Koyu Gri */
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .nav-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        .nav-logo {
+            color: #fcd535;
+            font-size: 20px;
+            font-weight: 800;
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 10px;
+            height: 100%;
+            align-items: center;
+        }
+        .nav-item {
+            color: #eaecef;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 600;
+            padding: 10px 18px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        .nav-item:hover {
+            color: #fcd535;
+            background-color: rgba(253, 213, 53, 0.1);
+        }
+        .nav-item.active {
+            color: #1e2329;
+            background-color: #fcd535;
+        }
+
+        @media (max-width: 992px) {
+            .nav-container {
+                flex-direction: column;
+                height: auto;
+                padding: 15px 10px;
+                gap: 15px;
+            }
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 5px;
+            }
+            .nav-item {
+                font-size: 13px;
+                padding: 8px 12px;
+            }
+        }
+        /* --- Modern Nav Bar Tasarımı Bitişi --- */
+
+        :root { 
+            --bg: #0b0e11; 
+            --card: #181a20; 
+            --text: #eaecef; 
+            --gold: #fcd535; 
+            --green: #0ecb81; 
+            --red: #f6465d; 
+            --border: #2b3139; 
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
+            background-color: var(--bg);
+            color: var(--text);
             margin: 0;
-            padding: 40px 20px;
+            padding: 0 0 40px 0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
         }
         .container {
-            background-color: #ffffff;
+            background-color: var(--card);
+            border: 1px solid var(--border);
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             max-width: 500px;
             width: 100%;
+            box-sizing: border-box;
         }
         h2 {
             text-align: center;
-            color: #333;
+            color: var(--gold);
             margin-bottom: 5px;
         }
         .subtitle {
             text-align: center;
-            color: #777;
+            color: #848e9c;
             font-size: 14px;
             margin-bottom: 25px;
         }
@@ -39,26 +123,32 @@
         label {
             display: block;
             margin-bottom: 5px;
-            color: #666;
+            color: #848e9c;
             font-weight: 600;
         }
         input, select {
             width: 100%;
             padding: 10px;
-            border: 1px solid #ccc;
+            background-color: #2b3139;
+            border: 1px solid var(--border);
+            color: #fff;
             border-radius: 6px;
             box-sizing: border-box;
             font-size: 16px;
         }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
         .coin-select-box {
-            background-color: #f8f9fa;
-            border: 2px dashed #f3ba2f; /* Binance sarısı */
+            background-color: #202630;
+            border: 2px dashed var(--gold);
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
         }
         .api-btn {
-            background-color: #f3ba2f;
+            background-color: var(--gold);
             margin-top: 10px;
             width: 100%;
             color: #212529;
@@ -75,23 +165,23 @@
         }
         button.calc-btn {
             width: 100%;
-            color: white;
+            color: #000;
             padding: 14px;
             border: none;
             border-radius: 6px;
             font-size: 16px;
             cursor: pointer;
             font-weight: bold;
-            background-color: #007bff;
+            background-color: var(--gold);
             transition: background-color 0.2s;
             margin-top: 10px;
         }
         button.calc-btn:hover {
-            background-color: #0056b3;
+            background-color: #dcb014;
         }
         .results {
             margin-top: 25px;
-            border-top: 2px solid #eee;
+            border-top: 2px solid var(--border);
             padding-top: 20px;
         }
         .result-item {
@@ -102,11 +192,11 @@
         }
         .value {
             font-weight: bold;
-            color: #2c3e50;
+            color: var(--text);
         }
         .indicator-box {
             margin-top: 15px;
-            background: #eee;
+            background: #2b3139;
             border-radius: 10px;
             height: 24px;
             overflow: hidden;
@@ -122,24 +212,24 @@
             padding: 15px;
             border-radius: 8px;
             text-align: center;
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 900;
             letter-spacing: 1px;
         }
-        .zone-dip { background-color: #28a745; color: white; } /* Akümülasyon / Alım */
-        .zone-fair { background-color: #ffc107; color: #212529; } /* Adil Değer */
-        .zone-tepe { background-color: #dc3545; color: white; } /* Dağıtım / Satım */
+        .zone-dip { background-color: var(--green); color: white; } 
+        .zone-fair { background-color: #ffc107; color: #212529; } 
+        .zone-tepe { background-color: var(--red); color: white; } 
         
         #apiStatus {
             font-size: 13px;
-            color: #666;
+            color: #848e9c;
             margin-top: 5px;
             display: block;
             text-align: center;
         }
         .target-box {
-            background-color: #f8f9fa;
-            border: 1px solid #e2e8f0;
+            background-color: #202630;
+            border: 1px solid var(--border);
             border-radius: 6px;
             padding: 12px;
             margin-top: 15px;
@@ -147,21 +237,38 @@
         .target-title {
             font-weight: bold;
             font-size: 14px;
-            color: #4a5568;
+            color: #848e9c;
             margin-bottom: 8px;
-            border-bottom: 1px solid #edf2f7;
+            border-bottom: 1px solid var(--border);
             padding-bottom: 4px;
         }
     </style>
 </head>
 <body>
 
+<!-- NAV BAR BAŞLANGICI -->
+<nav class="main-navbar">
+    <div class="nav-container">
+        <a href="index.html" class="nav-logo">🎯 BALİNASAVAR PRO</a>
+        <div class="nav-links" id="mainNavLinks">
+            <a href="index.html" class="nav-item">Dip Avcısı</a>
+            <a href="tepe-dip.html" class="nav-item">Tepe-Dip Matrisi</a>
+            <a href="kirilim.html" class="nav-item">Kırılım Avcısı</a>
+            <a href="kaldirac-analiz.html" class="nav-item">Kaldıraç Analizi</a>
+            <a href="gercekfiyat.html" class="nav-item">Gerçek Fiyat</a>
+            <a href="pilanlama.html" class="nav-item">Planlama</a>
+            <a href="detaybak.html" class="nav-item">Detail Gör</a>
+        </div>
+    </div>
+</nav>
+<!-- NAV BAR BİTİŞİ -->
+
 <div class="container">
     <h2>Binance Canlı Veri Analizi</h2>
     <div class="subtitle">TVL & Arz Tabanlı İndikatör Hesaplayıcı</div>
     
     <div class="coin-select-box">
-        <label for="coinTickerList" style="color: #dcb014;">Binance İşlem Çifti Seçin:</label>
+        <label for="coinTickerList" style="color: var(--gold);">Binance İşlem Çifti Seçin:</label>
         <select id="coinTickerList" onchange="tickerGuncelle(this.value)">
             <option value="BTCUSDT">Bitcoin (BTC / USDT)</option>
             <option value="ETHUSDT">Ethereum (ETH / USDT)</option>
@@ -221,16 +328,35 @@
         <div class="target-box">
             <div class="target-title">🎯 İndikatör Strateji Seviyeleri</div>
             <div class="result-item" style="font-size: 14px; margin-bottom: 6px;">
-                <span style="color: #28a745; font-weight: bold;">Stratejik Alım Bölgesi (Mcap/TVL = 0.3):</span>
-                <span class="value" id="targetDipPrice" style="color: #28a745;">$0.00</span>
+                <span style="color: var(--green); font-weight: bold;">Stratejik Alım Bölgesi (Mcap/TVL = 0.3):</span>
+                <span class="value" id="targetDipPrice" style="color: var(--green);">$0.00</span>
             </div>
             <div class="result-item" style="font-size: 14px; margin-bottom: 0;">
-                <span style="color: #dc3545; font-weight: bold;">Riskli Satım Bölgesi (Mcap/TVL = 1.2):</span>
-                <span class="value" id="targetTepePrice" style="color: #dc3545;">$0.00</span>
+                <span style="color: var(--red); font-weight: bold;">Riskli Satım Bölgesi (Mcap/TVL = 1.2):</span>
+                <span class="value" id="targetTepePrice" style="color: var(--red);">$0.00</span>
             </div>
         </div>
     </div>
 </div>
+
+<!-- OTOMATİK AKTİF SAYFA SEÇİCİ SCRIPT -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let currentPath = window.location.pathname.split("/").pop();
+        if (currentPath === "" || currentPath === "index.html") {
+            currentPath = "index.html";
+        }
+        const navLinks = document.querySelectorAll("#mainNavLinks .nav-item");
+        navLinks.forEach(link => {
+            const linkPath = link.getAttribute("href");
+            if (currentPath === linkPath) {
+                link.classList.add("active");
+            } else {
+                link.classList.remove("active");
+            }
+        });
+    });
+</script>
 
 <script>
 window.onload = function() {
@@ -257,12 +383,12 @@ async function binanceVerisiniCek() {
     const statusText = document.getElementById('apiStatus');
     if(!ticker) {
         statusText.innerText = "Durum: Lütfen geçerli bir işlem çifti girin!";
-        statusText.style.color = "red";
+        statusText.style.color = "var(--red)";
         return;
     }
 
     statusText.innerText = `Durum: Binance üzerinden ${ticker} fiyatı alınıyor...`;
-    statusText.style.color = "#666";
+    statusText.style.color = "#848e9c";
     
     try {
         const url = `https://api.binance.com/api/v3/ticker/price?symbol=${ticker}`;
@@ -284,7 +410,7 @@ async function binanceVerisiniCek() {
             if(ticker === 'BTCUSDT') {
                 document.getElementById('circulating').value = 19700000; 
                 document.getElementById('maxSupply').value = 21000000;
-                document.getElementById('tvl').value = 25000000000; // Güncel tahminî DeFi/L2 kilitli değerler baz alınabilir
+                document.getElementById('tvl').value = 25000000000; 
             } else if(ticker === 'ETHUSDT') {
                 document.getElementById('circulating').value = 120000000; 
                 document.getElementById('maxSupply').value = 120000000;
@@ -300,7 +426,7 @@ async function binanceVerisiniCek() {
             }
 
             statusText.innerText = `Durum: Başarılı! Binance canlı fiyatı güncellendi.`;
-            statusText.style.color = "green";
+            statusText.style.color = "var(--green)";
         } else {
             statusText.innerText = "Durum: İşlem çifti bulunamadı. Örn: BTCUSDT";
             statusText.style.color = "orange";
@@ -308,7 +434,7 @@ async function binanceVerisiniCek() {
     } catch (error) {
         console.error(error);
         statusText.innerText = `Durum: Hata - ${error.message}`;
-        statusText.style.color = "red";
+        statusText.style.color = "var(--red)";
     }
 }
 
@@ -332,8 +458,6 @@ function hesapla() {
     document.getElementById('resFDV').innerText = '$' + fdv.toLocaleString('en-US', {maximumFractionDigits: 0});
     document.getElementById('resRatio').innerText = oran.toFixed(2);
 
-    // İNDİKATÖR STRATEJİSİ (Alım Dip & Satım Tepe Seviyeleri)
-    // Örnek indikatör kuralı: Mcap/TVL oranının 0.3 olması harika bir DİP/ALIM, 1.2+ olması ise TEPE/SATIM bölgesidir.
     const dipOrani = 0.3;
     const tepeOrani = 1.2;
 
@@ -343,12 +467,10 @@ function hesapla() {
     document.getElementById('targetDipPrice').innerText = '$' + hesaplananDipFiyat.toLocaleString('en-US', {maximumFractionDigits: 4});
     document.getElementById('targetTepePrice').innerText = '$' + hesaplananTepeFiyat.toLocaleString('en-US', {maximumFractionDigits: 4});
 
-    // Durum ve Grafik Güncelleme Mantığı
     const statusDiv = document.getElementById('statusMessage');
     const bar = document.getElementById('indicatorBar');
     statusDiv.className = "status-box"; 
 
-    // Çubuk yüzdesi hesaplama (Maksimum 1.5 oranını %100 kabul edelim)
     let barYuzdesi = (oran / 1.5) * 100;
     if (barYuzdesi > 100) barYuzdesi = 100;
     if (barYuzdesi < 0) barYuzdesi = 0;
