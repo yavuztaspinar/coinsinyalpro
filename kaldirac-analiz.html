@@ -2,17 +2,33 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Gelişmiş Kripto Analiz Motoru</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binance Canlı Token Analiz & İndikatör Hesaplayıcı</title>
     <style>
+        /* Renk Paleti Tanımlamaları */
+        :root { 
+            --bg: #121824;          /* Soft Gece Mavisi Arka Plan */
+            --card: #1c2434;        /* Kartlar için hafif açık soft mavi */
+            --navbar: #161d2a;      /* Navigasyon bar için uyumlu ton */
+            --input-bg: #242f47;    /* Girdi alanlarının iç rengi */
+            --border: #2d384e;      /* Çizgiler ve kenarlıklar */
+            --text: #eaecef;        /* Ana metin rengi */
+            --text-muted: #909bb0;  /* Yardımcı metin rengi */
+            --gold: #fcd535;        /* Binance Sarısı */
+            --green: #0ecb81; 
+            --red: #f6465d; 
+        }
+
         /* --- Modern Nav Bar Tasarımı Başlangıcı --- */
         .main-navbar {
             width: 100%;
-            background-color: #1e2329; /* Binance Koyu Gri */
+            background-color: var(--navbar);
             position: sticky;
             top: 0;
             z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             margin-bottom: 30px;
+            border-bottom: 1px solid var(--border);
         }
         .nav-container {
             max-width: 1600px;
@@ -25,7 +41,7 @@
             box-sizing: border-box;
         }
         .nav-logo {
-            color: #fcd535;
+            color: var(--gold);
             font-size: 20px;
             font-weight: 800;
             text-decoration: none;
@@ -38,7 +54,7 @@
             align-items: center;
         }
         .nav-item {
-            color: #eaecef;
+            color: var(--text);
             text-decoration: none;
             font-size: 15px;
             font-weight: 600;
@@ -47,12 +63,12 @@
             transition: all 0.2s ease;
         }
         .nav-item:hover {
-            color: #fcd535;
+            color: var(--gold);
             background-color: rgba(253, 213, 53, 0.1);
         }
         .nav-item.active {
-            color: #1e2329;
-            background-color: #fcd535;
+            color: var(--bg);
+            background-color: var(--gold);
         }
 
         @media (max-width: 992px) {
@@ -74,98 +90,132 @@
         }
         /* --- Modern Nav Bar Tasarımı Bitişi --- */
 
-        :root { --bg: #0b0e11; --card: #181a20; --text: #eaecef; --gold: #fcd535; --green: #0ecb81; --red: #f6465d; --border: #2b3139; }
-        body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 0 0 20px 0; display: flex; flex-direction: column; align-items: center; }
-        .container { width: 100%; max-width: 1000px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-sizing: border-box; }
-        h2 { text-align: center; color: var(--gold); }
-        .control-panel { display: flex; gap: 10px; margin-bottom: 20px; }
-        input, select, button { padding: 10px; background: #2b3139; border: 1px solid var(--border); color: #fff; border-radius: 4px; }
-        button { background: var(--gold); color: #000; font-weight: bold; cursor: pointer; border: none; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 10px; border-bottom: 1px solid var(--border); text-align: left; }
-        .sig-AL { color: var(--green); } .sig-SAT { color: var(--red); } .sig-NÖTR { color: #848e9c; }
-    </style>
-</head>
-<body>
-
-<nav class="main-navbar">
-    <div class="nav-container">
-        <a href="index.html" class="nav-logo">🎯 BALİNASAVAR PRO</a>
-        <div class="nav-links" id="mainNavLinks">
-            <a href="index.html" class="nav-item">Dip Avcısı</a>
-            <a href="tepe-dip.html" class="nav-item">Tepe-Dip Matrisi</a>
-            <a href="kirilim.html" class="nav-item">Kırılım Avcısı</a>
-            <a href="kaldirac-analiz.html" class="nav-item">Kaldıraç Analizi</a>
-            <a href="gercekfiyat.html" class="nav-item">Gerçek Fiyat</a>
-            <a href="pilanlama.html" class="nav-item">Planlama</a>
-            <a href="detaybak.html" class="nav-item">Detail Gör</a>
-        </div>
-    </div>
-</nav>
-<div class="container">
-    <h2>📊 YAVUZ TAŞPINAR KALDIRAÇ ORANLARI</h2>
-    <div class="control-panel">
-        <input type="text" id="coinInput" value="BTC" placeholder="Coin (Örn: BTC)">
-        <select id="timeframe"><option value="1h" selected>1 Saat</option><option value="4h">4 Saat</option><option value="1d">1 Gün</option></select>
-        <button onclick="startAnalysis()">Analiz Et</button>
-    </div>
-    <div id="resultArea" style="display:none;">
-        <h3 id="targetTitle"></h3>
-        <table><thead><tr><th>#</th><th>İndikatör</th><th>Değer</th><th>Sinyal</th></tr></thead><tbody id="indicatorRows"></tbody></table>
-    </div>
-</div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        let currentPath = window.location.pathname.split("/").pop();
-        if (currentPath === "" || currentPath === "index.html") {
-            currentPath = "index.html";
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0 0 40px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        const navLinks = document.querySelectorAll("#mainNavLinks .nav-item");
-        navLinks.forEach(link => {
-            const linkPath = link.getAttribute("href");
-            if (currentPath === linkPath) {
-                link.classList.add("active");
-            } else {
-                link.classList.remove("active");
-            }
-        });
-    });
-</script>
-
-<script>
-    const SMA = (d, p) => d.map((_, i) => i < p - 1 ? 0 : d.slice(i - p + 1, i + 1).reduce((a, b) => a + b, 0) / p);
-    const EMA = (d, p) => { let k = 2/(p+1), ema = [d[0]]; for(let i=1; i<d.length; i++) ema.push(d[i]*k + ema[i-1]*(1-k)); return ema; };
-    const StdDev = (d, p, smas) => d.map((_, i) => i < p - 1 ? 0 : Math.sqrt(d.slice(i-p+1, i+1).reduce((a, b) => a + Math.pow(b - smas[i], 2), 0) / p));
-
-    async function startAnalysis() {
-        const coin = document.getElementById("coinInput").value.trim().toUpperCase();
-        const tf = document.getElementById("timeframe").value;
-        const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin}USDT&interval=${tf}&limit=500`);
-        const klines = await res.json();
-        const closes = klines.map(k => parseFloat(k[4])), highs = klines.map(k => parseFloat(k[2])), lows = klines.map(k => parseFloat(k[3]));
-        const len = closes.length - 1, current = closes[len];
-
-        // Temel İndikatörler (Örnek: RSI, BB)
-        let indicators = [];
-        const sma20 = SMA(closes, 20), sdev = StdDev(closes, 20, sma20);
-        indicators.push({ name: "RSI", val: "Hesaplanıyor", sig: "NÖTR" }); // Buraya 23 indikatör mantığını ekleyin
-        
-        // Likidite Motoru
-        const recentLow = Math.min(...lows.slice(len-20, len)), recentHigh = Math.max(...highs.slice(len-20, len));
-        const longRisk = ((current - recentLow) / recentLow) * 100;
-        const shortRisk = ((recentHigh - current) / current) * 100;
-
-        indicators.push({ name: "🔥 Long Tasfiye Riski", val: `Risk: ${Math.min(100, longRisk*2).toFixed(1)}%`, sig: longRisk < 10 ? "AL" : "NÖTR" });
-        indicators.push({ name: "⚠️ Short Sıkıştırma Riski", val: `Risk: ${Math.min(100, shortRisk*2).toFixed(1)}%`, sig: shortRisk < 10 ? "SAT" : "NÖTR" });
-
-        const tbody = document.getElementById("indicatorRows"); tbody.innerHTML = "";
-        indicators.forEach((ind, i) => {
-            tbody.innerHTML += `<tr><td>${i+1}</td><td>${ind.name}</td><td>${ind.val}</td><td class="sig-${ind.sig}">${ind.sig}</td></tr>`;
-        });
-        document.getElementById("resultArea").style.display = "block";
-        document.getElementById("targetTitle").innerText = `${coin}/USDT Analizi`;
-    }
-</script>
-</body>
-</html>
+        .container {
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            max-width: 500px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        h2 {
+            text-align: center;
+            color: var(--gold);
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border);
+            color: #fff;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+        .coin-select-box {
+            background-color: #1e283d;
+            border: 2px dashed var(--gold);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .api-btn {
+            background-color: var(--gold);
+            margin-top: 10px;
+            width: 100%;
+            color: var(--bg);
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .api-btn:hover {
+            background-color: #dcb014;
+        }
+        button.calc-btn {
+            width: 100%;
+            color: var(--bg);
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            background-color: var(--gold);
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+        button.calc-btn:hover {
+            background-color: #dcb014;
+        }
+        .results {
+            margin-top: 25px;
+            border-top: 2px solid var(--border);
+            padding-top: 20px;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        .value {
+            font-weight: bold;
+            color: var(--text);
+        }
+        .indicator-box {
+            margin-top: 15px;
+            background: var(--input-bg);
+            border-radius: 10px;
+            height: 24px;
+            overflow: hidden;
+            position: relative;
+        }
+        .indicator-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease, background-color 0.5s ease;
+        }
+        .status-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 17px;
+            font-weight: 900
