@@ -22,7 +22,7 @@
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background-color: var(--bg);
             color: var(--text);
-            padding: 0 0 40px 0; /* Üst padding navbar için sıfırlandı */
+            padding: 0 0 40px 0;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -30,10 +30,10 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* --- Modern Nav Bar Tasarımı --- */
+        /* --- Merkezden Gelecek Olan Navbar İçin CSS Kural Tanımlamaları --- */
         .main-navbar {
             width: 100%;
-            background-color: #1e2329; /* Binance Koyu Gri */
+            background-color: #1e2329;
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -76,8 +76,8 @@
             background-color: rgba(253, 213, 53, 0.1);
         }
         .nav-item.active {
-            color: #1e2329;
-            background-color: #fcd535;
+            color: #1e2329 !important;
+            background-color: #fcd535 !important;
         }
 
         @media (max-width: 992px) {
@@ -97,7 +97,7 @@
                 padding: 8px 12px;
             }
         }
-        /* --- Nav Bar Bitiş --- */
+        /* --- Tasarım Bitiş --- */
 
         .scanner-box {
             width: 100%;
@@ -194,22 +194,7 @@
 </head>
 <body>
 
-<!-- NAV BAR BAŞLANGICI -->
-<nav class="main-navbar">
-    <div class="nav-container">
-        <a href="index.html" class="nav-logo">🎯 BALİNASAVAR PRO</a>
-        <div class="nav-links">
-            <a href="index.html" class="nav-item active">Dip Avcısı</a>
-            <a href="tepe-dip.html" class="nav-item">Tepe-Dip Matrisi</a>
-            <a href="kirilim.html" class="nav-item">Kırılım Avcısı</a>
-            <a href="kaldirac-analiz.html" class="nav-item">Kaldıraç Analizi</a>
-            <a href="gercekfiyat.html" class="nav-item">Gerçek Fiyat</a>
-            <a href="pilanlama.html" class="nav-item">Planlama</a>
-            <a href="detaybak.html" class="nav-item">Detay Gör</a>
-        </div>
-    </div>
-</nav>
-<!-- NAV BAR BİTİŞİ -->
+<div id="dynamic-navbar" style="width: 100%;"></div>
 
 <div class="scanner-box">
     <h2>🎯 BALİNASAVAR PRO // DİP UYUMSUZLUK AVCISI</h2>
@@ -287,6 +272,26 @@
         </table>
     </div>
 </div>
+
+<script>
+    fetch('navbar.html')
+        .then(response => {
+            if (!response.ok) throw new Error("Navbar dosyası bulunamadı.");
+            return response.text();
+        })
+        .then(data => {
+            document.getElementById('dynamic-navbar').innerHTML = data;
+            
+            // İçerideki script elementlerini yakalayıp çalıştırıyoruz
+            const scripts = document.getElementById('dynamic-navbar').querySelectorAll('script');
+            scripts.forEach(oldScript => {
+                const newScript = document.createElement('script');
+                newScript.text = oldScript.text;
+                document.body.appendChild(newScript);
+            });
+        })
+        .catch(error => console.error("Menü yükleme hatası:", error));
+</script>
 
 <script>
     let backupCryptoMatrix = [];
