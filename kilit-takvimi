@@ -141,18 +141,19 @@
 
 <nav class="main-navbar">
     <div class="nav-container">
-        <a href="index.html" class="nav-logo">🎯 BALİNASAVAR PRO</a>
+        <a href="../" class="nav-logo">🎯 BALİNASAVAR PRO</a>
         <div class="nav-links">
-            <a href="kilit-takvimi.html" class="nav-item active">Dip Avcısı</a>
-            <a href="tepe-dip.html" class="nav-item">Tepe-Dip Matrisi</a>
-            <a href="kirilim.html" class="nav-item">Kırılım Avcısı</a>
-            <a href="kaldirac-analiz.html" class="nav-item">Kaldıraç Analizi</a>
-            <a href="gercekfiyat.html" class="nav-item">Gerçek Fiyat</a>
-            <a href="pilanlama.html" class="nav-item">Planlama</a>
-            <a href="detaybak.html" class="nav-item">Detail Gör</a>
+            <a href="../kilit-takvimi/" class="nav-item active">Kilit Takvimi</a>
+            <a href="../tepe-dip/" class="nav-item">Tepe-Dip Matrisi</a>
+            <a href="../kirilim/" class="nav-item">Kırılım Avcısı</a>
+            <a href="../kaldirac-analiz/" class="nav-item">Kaldıraç Analizi</a>
+            <a href="../gercekfiyat/" class="nav-item">Gerçek Fiyat</a>
+            <a href="../pilanlama/" class="nav-item">Planlama</a>
+            <a href="../detaybak/" class="nav-item">Detail Gör</a>
         </div>
     </div>
 </nav>
+
 <div class="container">
     <h1>📅 Kilit Takvimi Verileri</h1>
     <p>Aşağıdaki token kilit açılım verileri yerel veritabanından dinamik olarak yüklenmektedir.</p>
@@ -174,8 +175,8 @@
 </div>
 
 <script>
-    // JSON dosyasından verileri oku
-    fetch('veriler.json')
+    // JSON dosyasını her zaman kendi klasöründen (göreceli olarak) çeker
+    fetch('./veriler.json')
         .then(response => {
             if (!response.ok) throw new Error("JSON dosyası bulunamadı!");
             return response.json();
@@ -183,6 +184,12 @@
         .then(data => {
             const tabloGövdesi = document.getElementById('kilit-verileri');
             tabloGövdesi.innerHTML = ""; // Yükleniyor yazısını temizle
+
+            // Veritabanı boşsa kullanıcıyı bilgilendir
+            if (!data.kilit_takvimi || data.kilit_takvimi.length === 0) {
+                tabloGövdesi.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Gösterilebilecek kilit verisi bulunmuyor.</td></tr>`;
+                return;
+            }
 
             // JSON içindeki 'kilit_takvimi' listesini döngüye al
             data.kilit_takvimi.forEach(item => {
