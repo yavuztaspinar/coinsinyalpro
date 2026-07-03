@@ -6,75 +6,122 @@
     <title>23 İndikatörlü Gelişmiş Kripto Analiz Motoru</title>
     <style>
         :root {
-            --bg: #f5f7fa; 
-            --card: #ffffff; 
+            --bg: #ffffff; 
+            --card: #f8f9fa; 
             --text: #1e2329; 
+            --text-muted: #5e6673;
             --gold: #c79200; 
+            --gold-btn: #fcd535;
+            --border: #eaecef; 
             --green: #03a66d; 
             --red: #cf304a; 
             --blue: #0066ed; 
-            --border: #e6e8ea; 
         }
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0 0 40px 0;
             background-color: var(--bg);
             color: var(--text);
-            padding: 20px;
-            margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 100vh;
         }
+        
+        /* --- Ortak Nav Bar Tasarımı --- */
+        .main-navbar {
+            width: 100%;
+            background-color: #1e2329;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .nav-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+            padding: 0 20px;
+        }
+        .nav-logo {
+            color: #fcd535;
+            font-size: 20px;
+            font-weight: 800;
+            text-decoration: none;
+        }
+        .nav-links { display: flex; gap: 10px; height: 100%; align-items: center; }
+        .nav-item {
+            color: #eaecef;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 600;
+            padding: 10px 18px;
+            border-radius: 6px;
+        }
+        .nav-item.active { color: #1e2329; background-color: #fcd535; }
+
+        /* --- İçerik Alanı --- */
         .container {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1100px;
             background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+            box-sizing: border-box;
         }
-        h2 { text-align: center; color: var(--gold); margin-top: 0; }
+        h2 { text-align: center; color: var(--text); margin-top: 0; font-size: 24px; font-weight: 800; }
+        
         .control-panel {
             display: flex;
             gap: 15px;
-            background: #21262c;
-            padding: 15px;
-            border-radius: 8px;
+            background: #1e2329;
+            padding: 20px;
+            border-radius: 12px;
             margin-bottom: 20px;
             flex-wrap: wrap;
             align-items: flex-end;
         }
-        .input-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 150px; }
-        label { font-size: 12px; color: #848e9c; font-weight: bold; }
+        .input-group { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 150px; }
+        label { font-size: 13px; color: #aeaeae; font-weight: bold; }
+        
         input, select, button {
             padding: 12px;
             background: #2b3139;
-            border: 1px solid var(--border);
+            border: 1px solid #474d57;
             color: #fff;
             border-radius: 6px;
             font-size: 14px;
             outline: none;
         }
-        input { background: #1e2226; }
-        input:focus { border-color: var(--gold); }
+        input { background: #1e2226; text-transform: uppercase; }
+        input:focus { border-color: var(--gold-btn); }
+        
         button {
-            background: var(--gold);
-            color: #000;
+            background: var(--gold-btn) !important;
+            color: #1e2329 !important;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.2s;
             border: none;
         }
-        button:hover { background: #f3ba2f; }
+        button:hover { background: #f3ba2f !important; }
+
         .summary-box {
             display: flex;
             justify-content: space-between;
-            background: #1e2226;
+            background: #1e2329;
+            color: #fff;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
-            border-left: 5px solid var(--border);
+            border-left: 5px solid var(--gold-btn);
         }
         .signal-badge {
             padding: 6px 15px;
@@ -82,16 +129,34 @@
             font-weight: bold;
             font-size: 18px;
         }
-        .sig-AL { background: rgba(14, 203, 129, 0.2); color: var(--green); border: 1px solid var(--green); }
-        .sig-SAT { background: rgba(246, 70, 93, 0.2); color: var(--red); border: 1px solid var(--red); }
+        .sig-AL { background: rgba(14, 203, 129, 0.2); color: #0ecb81; border: 1px solid #0ecb81; }
+        .sig-SAT { background: rgba(246, 70, 93, 0.2); color: #f6465d; border: 1px solid #f6465d; }
         .sig-NÖTR { background: rgba(132, 142, 156, 0.2); color: #848e9c; border: 1px solid #848e9c; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
-        th { background: #2b3139; color: var(--gold); }
-        .status { font-weight: bold; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 15px; }
+        th { background: #f1f3f5; color: #474d57; font-weight: 700; }
+        tbody tr:nth-child(even) { background-color: rgba(0, 0, 0, 0.01); }
+        .status { font-weight: bold; padding: 4px 8px; border-radius: 4px; font-size: 13px; }
     </style>
 </head>
 <body>
+
+<nav class="main-navbar">
+    <div class="nav-container">
+        <a href="index.html" class="nav-logo">🎯 BALİNASAVAR PRO</a>
+        <div class="nav-links">
+            <a href="kilit-takvimi.html" class="nav-item">Kilit Takvimi</a>
+            <a href="tepe-dip.html" class="nav-item">Tepe-Dip Matrisi</a>
+            <a href="kirilim.html" class="nav-item active">Kırılım Avcısı</a>
+            <a href="kaldirac-analiz.html" class="nav-item">Kaldıraç Analizi</a>
+            <a href="gercekfiyat.html" class="nav-item">Gerçek Fiyat</a>
+            <a href="pilanlama.html" class="nav-item">Planlama</a>
+            <a href="detaybak.html" class="nav-item">Detail Gör</a>
+        </div>
+    </div>
+</nav>
+
 <div class="container">
     <h2>📊 23 YAVUZ TAŞPINAR KIRILIM CANLI ANALİZ</h2>
     <div class="control-panel">
@@ -108,9 +173,9 @@
                 <option value="1d">1 Gün</option>
             </select>
         </div>
-        <button id="calcBtn" onclick="startAnalysis()" style="flex: 0.5; min-width: 120px;">Analiz Et</button>
+        <button id="calcBtn" style="flex: 0.5; min-width: 120px;">Analiz Et</button>
     </div>
-
+    
     <div id="resultArea" style="display: none;">
         <div class="summary-box" id="summaryBox">
             <div>
@@ -135,14 +200,13 @@
             <tbody id="indicatorRows"></tbody>
         </table>
     </div>
-    <div id="infoMessage" style="text-align: center; color: #848e9c; margin-top: 20px;">
+    <div id="infoMessage" style="text-align: center; color: var(--text-muted); margin-top: 20px;">
         Coin sembolünü girip "Analiz Et" butonuna basın.
     </div>
 </div>
 
 <script>
-    const SMA = (d, p) => d.map((_, i) => i < p - 1 ? 0 : d.slice(i - p + 1, i + 1).reduce((a, b) => a + b, 0) / p);
-    
+    const SMA = (d, p) => d.map((_, i) => i < p - 1 ? 0 : d.slice(i - p + 1, i + 1).reduce((a, b) => a + b, 0) / p);    
     const EMA = (d, p) => {
         let k = 2 / (p + 1), ema = [];
         if(d.length === 0) return [];
@@ -160,16 +224,17 @@
         return Math.sqrt(sum / p);
     });
 
-    async function startAnalysis() {
+    // Butona tıklama olayını JavaScript içinden kesinleştiriyoruz
+    document.getElementById("calcBtn").addEventListener("click", async function() {
         const coin = document.getElementById("coinInput").value.trim().toUpperCase().replace("USDT", "");
         const tf = document.getElementById("timeframe").value;
         const btn = document.getElementById("calcBtn");
         const info = document.getElementById("infoMessage");
         const resArea = document.getElementById("resultArea");
 
-        if(!coin) return alert("Lütfen geçerli bir coin sembolü girin.");
+        if(!coin) return alert("Lütfen geçerli bir coin sembolü girin.");            
         
-        btn.disabled = true;
+        btn.innerText = "Hesaplanıyor...";
         info.style.display = "block";
         info.innerText = "⏳ Veriler çekiliyor ve 23 indikatör eş zamanlı hesaplanıyor...";
         resArea.style.display = "none";
@@ -321,8 +386,7 @@
 
                 if (slope > 0) { 
                     let theoreticalTrendLine = peakHigh - (slope * remainingMums);
-                    trendValue = `Direnç: $${theoreticalTrendLine < 1 ? theoreticalTrendLine.toFixed(4) : theoreticalTrendLine.toFixed(2)}`;
-                    
+                    trendValue = `Direnç: $${theoreticalTrendLine < 1 ? theoreticalTrendLine.toFixed(4) : theoreticalTrendLine.toFixed(2)}`;                                        
                     if (currentPrice > theoreticalTrendLine) {
                         trendSignal = "AL";
                         trendValue += " (Kırıldı! 🚀)";
@@ -335,7 +399,7 @@
             }
             indicators.push({ name: "Düşeni Kırma Onayı", val: trendValue, sig: trendSignal });
 
-            // 23. YÜKSELENİ AŞAĞI KIRMA ONAYI (YÜKSELEN TRENDİN KILIRMASI - AYI ONAYI)
+            // 23. YÜKSELENİ AŞAĞI KIRMA ONAYI
             let dipLow = Math.min(...lows.slice(startIdx, len));
             let dipIndex = lows.slice(startIdx, len).indexOf(dipLow) + startIdx;
             let upTrendSignal = "NÖTR";
@@ -344,7 +408,7 @@
             if (dipIndex < len - 2) {
                 let remainingUpMums = len - dipIndex;
                 let priceRise = lows[len - 1] - dipLow;
-                let upSlope = priceRise / remainingUpMums; // Bar başına yükseliş eğimi
+                let upSlope = priceRise / remainingUpMums; 
 
                 if (upSlope > 0) {
                     let theoreticalSupportLine = dipLow + (upSlope * remainingUpMums);
@@ -362,11 +426,9 @@
             }
             indicators.push({ name: "Yükseleni Aşağı Kırma", val: upTrendValue, sig: upTrendSignal });
 
-
             // DOM TABLO VE SKOR ÜRETİMİ
             let tbody = document.getElementById("indicatorRows");
-            tbody.innerHTML = "";
-            
+            tbody.innerHTML = "";                        
             indicators.forEach((ind, index) => {
                 if(ind.sig === "AL") buySignals++;
                 if(ind.sig === "SAT") sellSignals++;
@@ -388,8 +450,7 @@
 
             const mainBadge = document.getElementById("mainSignal");
             mainBadge.innerText = finalDecision;
-            mainBadge.className = `signal-badge sig-${finalDecision}`;
-            
+            mainBadge.className = `signal-badge sig-${finalDecision}`;                        
             document.getElementById("scoreText").innerText = `Boğa (AL): ${buySignals} | Ayı (SAT): ${sellSignals}`;
             info.style.display = "none";
             resArea.style.display = "block";
@@ -398,9 +459,9 @@
             alert("Hata: " + err.message + "\nLütfen sembolü doğru yazdığınızdan emin olun (Örn: BTC, ETH, SOL).");
             info.innerText = "Hata oluştu. Yeniden deneyin.";
         } finally {
-            btn.disabled = false;
+            btn.innerText = "Analiz Et";
         }
-    }
+    });
 </script>
 </body>
 </html>
