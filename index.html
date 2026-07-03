@@ -6,15 +6,13 @@
     <title>BalinaSavar Pro - Giriş</title>
     <style>
         :root { --gold-btn: #fcd535; --dark-bg: #1e2329; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f8f9fa; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f8f9fa; }
         
-        /* GİRİŞ EKRANI */
         #login-overlay { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; gap: 15px; }
         input { padding: 12px; width: 280px; border: 1px solid #ddd; border-radius: 8px; }
         button { padding: 12px 30px; background: var(--gold-btn); border: none; cursor: pointer; font-weight: bold; border-radius: 8px; transition: 0.3s; }
-        button:hover { background: #e0be2a; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
         
-        /* PANEL */
         #protected-content { display: none; }
         .main-navbar { width: 100%; background-color: var(--dark-bg); height: 60px; display: flex; align-items: center; padding: 0 20px; color: var(--gold-btn); font-weight: bold; }
         .container { width: 90%; max-width: 1200px; margin: 20px auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
@@ -62,42 +60,54 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Giriş İşlemi
-        document.getElementById("login-btn").addEventListener("click", async () => {
+        const loginBtn = document.getElementById("login-btn");
+        const msg = document.getElementById("message");
+
+        // GİRİŞ İŞLEMİ
+        loginBtn.addEventListener("click", async () => {
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value.trim();
-            const msg = document.getElementById("message");
 
             if (!email || !password) {
-                msg.innerText = "Hata: E-posta veya şifre boş bırakılamaz!";
+                msg.innerText = "Hata: Alanları doldurun!";
                 return;
             }
+
+            loginBtn.disabled = true;
+            loginBtn.innerText = "Giriş yapılıyor...";
 
             try {
                 await signInWithEmailAndPassword(auth, email, password);
             } catch (err) {
                 msg.innerText = "Giriş Hatası: Bilgilerinizi kontrol edin.";
+                loginBtn.disabled = false;
+                loginBtn.innerText = "Giriş Yap";
+                console.error(err);
             }
         });
 
-        // Oturum Yönetimi
+        // OTURUM YÖNETİMİ
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                const docRef = doc(db, "onayli_kullanicilar", user.email);
-                const docSnap = await getDoc(docRef);
+                try {
+                    const docRef = doc(db, "onayli_kullanicilar", user.email);
+                    const docSnap = await getDoc(docRef);
 
-                if (docSnap.exists()) {
-                    document.getElementById('login-overlay').style.display = 'none';
-                    document.getElementById('protected-content').style.display = 'block';
-                } else {
-                    alert("Hesabınız onaylanmamış!");
-                    await signOut(auth);
+                    if (docSnap.exists()) {
+                        document.getElementById('login-overlay').style.display = 'none';
+                        document.getElementById('protected-content').style.display = 'block';
+                    } else {
+                        alert("Hesabınız yetkili değil!");
+                        await signOut(auth);
+                        location.reload();
+                    }
+                } catch (e) {
+                    console.error("Veritabanı hatası:", e);
                 }
             }
         });
 
-        // Avcı Fonksiyonu
-        window.huntCombinations = function() {
+        window.huntCombinations = () => {
             document.getElementById('table').style.display = 'table';
             document.getElementById('status').innerText = 'Av başladı...';
         };
