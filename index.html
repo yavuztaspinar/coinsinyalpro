@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Coin Sinyal Pro - Onay Al</title>
+    <style>
+        body { background: #121212; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .auth-container { background: #1e1e1e; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); width: 300px; text-align: center; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #333; background: #252525; color: white; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #f0b90b; border: none; color: black; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        button:hover { background: #d8a60a; }
+        .toggle-link { color: #aaa; font-size: 12px; margin-top: 15px; cursor: pointer; display: block; }
+    </style>
+</head>
+<body>
+
+<div class="auth-container">
+    <h2 id="form-title">Giriş Onayı Al</h2>
+    <input type="email" id="email" placeholder="E-posta Adresi">
+    <input type="password" id="password" placeholder="Şifre">
+    <button id="auth-btn">Onay Al ve Giriş Yap</button>
+    <span class="toggle-link" id="toggle-form">Sistemde kaydınız yok mu? Giriş İzni İste</span>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // --- BURAYI DİKKATLE GÜNCELLE ---
+  const firebaseConfig = {
+    apiKey: "BURAYA_API_KEY_YAZ",
+    authDomain: "coinsinyalpro.firebaseapp.com",
+    projectId: "coinsinyalpro",
+    storageBucket: "coinsinyalpro.appspot.com",
+    messagingSenderId: "BURAYA_ID_YAZ",
+    appId: "BURAYA_APP_ID_YAZ"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let isLoginMode = true;
+  const formTitle = document.getElementById("form-title");
+  const authBtn = document.getElementById("auth-btn");
+  const toggleForm = document.getElementById("toggle-form");
+
+  toggleForm.addEventListener("click", () => {
+    isLoginMode = !isLoginMode;
+    formTitle.innerText = isLoginMode ? "Giriş Onayı Al" : "Giriş İzni İste";
+    authBtn.innerText = isLoginMode ? "Onay Al ve Giriş Yap" : "Giriş İzni Talebi Gönder";
+    toggleForm.innerText = isLoginMode ? "Sistemde kaydınız yok mu? Giriş İzni İste" : "Zaten izin istediniz mi? Onay Al";
+  });
+
+  authBtn.addEventListener("click", async () => {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    if(!email || !password) return alert("Lütfen boş alan bırakmayın.");
+
+    if (isLoginMode) {
+        signInWithEmailAndPassword(auth, email, password)
+          .then(async (userCredential) => {
+              const userId = userCredential.user.uid;
+              const userDocRef = doc(db, "kullanicilar", userId);
+              const userDocSnap = await getDoc(userDocRef);
+
+              if (userDocSnap.exists()) {
+                  const userData = userDocSnap.data();
+                  if (userData.onayli === true) {
+                      window.location.href = "sinyaller.html";
+                  } else {
+                      alert("Giriş Engellendi: Yönetici henüz bu hesaba onay vermedi.");
+                      await signOut(auth);
+                  }
+              } else {
+                  alert("Hata: Kaydınız veritabanında bulunamadı.");
+                  await signOut(auth);
+              }
+          })
+          .catch(err => alert("Giriş Hatası: " + err.message));
+    } else {
+        createUserWithEmailAndPassword(auth, email, password)
+          .then(async (userCredential) => {
+              await setDoc(doc(db, "kullanicilar", userCredential.user.uid), {
+                  email: email,
+                  onayli: false
+              });
+              alert("Talep iletildi! Yönetici onay verdiğinde giriş yapabilirsiniz.");
+              await signOut(auth);
+              location.reload(); 
+          })
+          .catch(err => alert("Talep Hatası: " + err.message));
+    }
+  });
+</script>
+</body>
+</html>
