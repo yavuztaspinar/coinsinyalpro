@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h2>Yönetici Onay Paneli</h2>
+    <div id="user-list"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        
+        // Buraya aynı config objeni ekle
+        const firebaseConfig = { /* SENİN CONFIGİN */ };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function listele() {
+            const q = query(collection(db, "kullanicilar"), where("onayli", "==", false));
+            const snapshot = await getDocs(q);
+            const list = document.getElementById("user-list");
+            
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                const div = document.createElement("div");
+                div.innerHTML = `${data.email} - <button onclick="onayla('${docSnap.id}')">Onayla</button>`;
+                list.appendChild(div);
+            });
+        }
+
+        window.onayla = async (uid) => {
+            await updateDoc(doc(db, "kullanicilar", uid), { onayli: true });
+            alert("Onaylandı!");
+            location.reload();
+        }
+
+        listele();
+    </script>
+</body>
+</html>
