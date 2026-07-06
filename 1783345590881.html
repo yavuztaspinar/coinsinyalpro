@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Yönetici Paneli</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: #fff; padding: 20px; }
+        .user-card { background: #1e1e1e; padding: 15px; margin: 10px 0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        button { background: #f0b90b; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>Yönetici Kontrol Paneli</h1>
+    <div id="status">Giriş yapılıyor...</div>
+    <div id="user-list"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // BURAYA KENDİ CONFIG BİLGİLERİNİ YAPIŞTIR
+        const firebaseConfig = {
+            apiKey: "AIzaSyCfez-GuBL-_jJ_uCYq9tRYouF9Dcs-l6o",
+            authDomain: "coinsinyalpro.firebaseapp.com",
+            projectId: "coinsinyalpro",
+            storageBucket: "coinsinyalpro.firebasestorage.app",
+            messagingSenderId: "1015200348139",
+            appId: "1:1015200348139:web:fc0b9c7d2b7170bf08cbae"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const ADMIN_EMAIL = "seninmailin@gmail.com"; // BURAYI KENDİ MAİLİNLE DEĞİŞTİR
+
+        onAuthStateChanged(auth, async (user) => {
+            const statusDiv = document.getElementById("status");
+            const listDiv = document.getElementById("user-list");
+
+            if (user && user.email === ADMIN_EMAIL) {
+                statusDiv.innerText = "Hoş geldin Yönetici.";
+                
+                // Onay bekleyenleri getir
+                const q = query(collection(db, "kullanicilar"), where("onayli", "==", false));
+                const querySnapshot = await getDocs(q);
+                
+                listDiv.innerHTML = "<h3>Onay Bekleyen Kullanıcılar:</h3>";
+                
+                if (querySnapshot.empty) {
+                    listDiv.innerHTML += "<p>Şu an bekleyen kullanıcı yok.</p>";
+                }
+
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const div = document.createElement("div");
+                    div.className = "user-card";
+                    div.innerHTML = `
+                        <span>${data.email}</span>
+                        <button id="btn-${docSnap.id}">Onayla</button>
+                    `;
+                    listDiv.appendChild(div);
+
+                    div.querySelector("button").onclick = async () => {
+                        await updateDoc(doc(db, "kullanicilar", docSnap.id), { onayli: true });
+                        alert("Kullanıcı onaylandı!");
+                        location.reload();
+                    };
+                });
+            } else {
+                statusDiv.innerHTML = "<h1>Yetkisiz Erişim!</h1><p>Lütfen yönetici hesabıyla giriş yapın.</p>";
+            }
+        });
+    </script>
+</body>
+</html>
