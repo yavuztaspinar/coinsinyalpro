@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BalinaSavar Pro - Gelişmiş İndikatör Matrisi</title>
+    <style>
+        :root {
+            --bg: #ffffff;       
+            --card: #f8f9fa;     
+            --text: #1e2329;     
+            --text-muted: #5e6673;
+            --gold: #c79d00;     
+            --gold-hover: #b08b00;
+            --gold-btn: #fcd535;
+            --green: #0ecb81;
+            --red: #f6465d;
+            --blue: #2f80ed;
+            --border: #eaecef;   
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 0 0 40px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- Modern Nav Bar Tasarımı --- */
+        .main-navbar {
+            width: 100%;
+            background-color: #1e2329;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .nav-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+            padding: 0 20px;
+        }
+        .nav-logo {
+            color: #fcd535;
+            font-size: 20px;
+            font-weight: 800;
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 10px;
+            height: 100%;
+            align-items: center;
+        }
+        .nav-item {
+            color: #eaecef;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 600;
+            padding: 10px 18px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        .nav-item:hover {
+            color: #fcd535;
+            background-color: rgba(253, 213, 53, 0.1);
+        }
+        .nav-item.active {
+            color: #1e2329;
+            background-color: #fcd535;
+        }
+
+        @media (max-width: 992px) {
+            .nav-container { flex-direction: column; height: auto; padding: 15px 10px; gap: 15px; }
+            .nav-links { flex-wrap: wrap; justify-content: center; gap: 5px; }
+            .nav-item { font-size: 13px; padding: 8px 12px; }
+        }
+
+        .scanner-box {
+            width: 100%;
+            max-width: 1650px;
+            background: #ffffff;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+            box-sizing: border-box;
+        }
+        h2 { 
+            text-align: center; 
+            color: var(--text); 
+            margin-top: 0; 
+            font-size: 28px; 
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+        .grid-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            background: #f1f3f5; 
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        label { font-size: 14px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;}
+        select, input, button {
+            padding: 14px;
+            background: #ffffff;
+            border: 1px solid #cdc1c1;
+            color: var(--text); 
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(199, 157, 0, 0.2); }
+        button {
+            background: var(--gold-btn);
+            color: #000;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            text-transform: uppercase;
+        }
+        button:hover { background: #f3ba2f; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(243, 186, 47, 0.3); }
+        button:disabled { background: #e9ecef; color: var(--text-muted); cursor: not-allowed; transform: none; box-shadow: none; }
+        .status-panel { text-align: center; margin: 30px 0; font-weight: 700; font-size: 18px; }
+        .bar-container {
+            width: 100%;
+            background: #e9ecef;
+            height: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            overflow: hidden;
+            display: none;
+        }
+        .bar-inner { width: 0%; height: 100%; background: var(--gold); transition: width 0.1s ease-out; }
+         
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 25px;
+            -webkit-overflow-scrolling: touch;
+        }
+        table { width: 100%; border-collapse: collapse; display: none; background: #ffffff; min-width: 1500px; }
+        th, td { padding: 15px 10px; text-align: left; border-bottom: 2px solid var(--border); font-size: 14px; }
+        th { background: #e9ecef; color: var(--text); font-size: 13px; font-weight: 700; text-transform: uppercase; } 
+        
+        /* --- Boydan Boya Bant Tasarımları (Yeni Eklendi) --- */
+        .match-row { background: #ffffff; animation: fadeIn 0.3s ease-in-out; } 
+        .match-row.row-buy { background-color: rgba(14, 203, 129, 0.18) !important; }
+        .match-row.row-sell { background-color: rgba(246, 70, 93, 0.18) !important; }
+        .match-row.row-risk { background-color: rgba(230, 126, 34, 0.15) !important; }
+        .match-row:hover { filter: brightness(0.96); } 
+
+        .badge { padding: 6px 12px; border-radius: 6px; font-size: 13px; margin-right: 4px; display: inline-block; font-weight: 700; }
+        .badge-confirm { padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 700; }
+        .badge-strong-confirm { background: rgba(14, 203, 129, 0.25); color: #089b61; border: 1px solid #0db372; }
+        .badge-weak-confirm { background: rgba(127, 140, 141, 0.15); color: #7f8c8d; border: 1px solid #7f8c8d; }
+        .badge-trade { font-size: 14px; letter-spacing: 0.5px; border: 1px solid transparent; width: 70px; text-align: center; }
+        .trade-buy { background: #0ecb81; color: #fff; border-color: var(--green); font-weight: 900; }
+        .trade-sell { background: #f6465d; color: #fff; border-color: var(--red); font-weight: 900; }
+        .trade-hold { background: rgba(132, 142, 156, 0.15); color: var(--text-muted); border-color: var(--text-muted); }
+        .large-numeric { font-family: 'Courier New', Courier, monospace; font-size: 16px; font-weight: 700; color: #000; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<nav class="main-navbar">
+    <div class="nav-container">
+        <a href="index.html" class="nav-logo">🎯 BALİNASAVAR PRO</a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-item active">Dip Avcısı</a>
+            <a href="kilit-takvimi.html" class="nav-item">Kilit Takvimi</a>
+            <a href="tepe-dip.html" class="nav-item">Tepe-Dip Matrisi</a>
+            <a href="kirilim.html" class="nav-item">Kırılım Avcısı</a>
+            <a href="kaldirac-analiz.html" class="nav-item">Kaldıraç Analizi</a>
+            <a href="gercekfiyat.html" class="nav-item">Gerçek Fiyat</a>
+            <a href="pilanlama.html" class="nav-item">Planlama</a>
+            <a href="detaybak.html" class="nav-item">Detay Gör</a>
+        </div>
+    </div>
+</nav>
+
+<div class="scanner-box">
+    <h2>🎯 BALİNASAVAR PRO // GELİŞMİŞ İNDİKATÖR & DİP MATRİSİ</h2>
+    <div class="grid-controls">
+        <div class="input-group">
+            <label>Veri Kaynağı Modu</label>
+            <select id="sourceMode">
+                <option value="binance" selected>Binance Canlı Matris</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Zaman Periyodu</label>
+            <select id="tf">
+                <option value="15m">15 Dakika (Hızlı)</option>
+                <option value="1h" selected>1 Saat (Önerilen)</option>
+                <option value="4h">4 Saat (Güçlü Trend)</option>
+                <option value="1d">1 Gün (Makro)</option>
+            </select>
+        </div>
+        <div class="input-group" id="filterGroup">
+            <label id="filterLabel">24s Hacim Filtresi</label>
+            <select id="filterChoice">
+                <option value="all">Tümünü Tara (Sınır Yok)</option>
+                <option value="100k-500k">100k - 500k USDT</option>
+                <option value="500k-2m">500k - 2M USDT</option>
+                <option value="2m-all" selected>2M USDT ve Üzeri (Güvenli)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Aşırı Satım Sınırı (RSI)</label>
+            <select id="limit">
+                <option value="35">RSI 35 Altı</option>
+                <option value="30" selected>RSI 30 Altı</option>
+                <option value="25">RSI 25 Altı</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Tarama Algoritması</label>
+            <select id="strategyMode">
+                <option value="all" selected>Tüm Sinyal ve Dipler</option>
+                <option value="reversal">Sadece Dönüş & Uyuşmazlık</option>
+                <option value="pure_dip">Sadece Mutlak Diptekiler</option>
+            </select>
+        </div>
+        <div class="input-group" style="justify-content: flex-end;">
+            <button id="btn" onclick="huntCombinations()">Avı Başlat</button>
+        </div>
+    </div>
+
+    <div class="status-panel">
+        <span id="info">Sistem hazır. Canlı matris bağlantısı bekleniyor...</span>
+        <div id="barBg" class="bar-container"><div id="bar" class="bar-inner"></div></div>
+    </div>
+
+    <div class="table-responsive">
+        <table id="table">
+            <thead>
+                <tr>
+                    <th>Parite</th>
+                    <th>24s Hacim</th>
+                    <th>Karar</th>
+                    <th>T9 TomDeMark</th>
+                    <th>SuperTrend</th>
+                    <th>CME Para Girişi</th>
+                    <th>VWMA Durumu</th>
+                    <th>RSI</th>
+                    <th>MACD</th>
+                    <th>Sinyal Durumu</th>
+                    <th>Onay</th>
+                    <th>MA Kesişim</th>
+                    <th>Dip Mesafe</th>
+                    <th>Fiyat</th>
+                </tr>
+            </thead>
+            <tbody id="list"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let backupCryptoMatrix = [];
+
+    const riskliArzListesi = {
+        "STRK": { risk: "KİLİT AÇILIMI", detay: "Her ayın 15'inde kilit açılımı baskısı.", maxArz: "Sınırlı" },
+        "ZEC": { risk: "GİZLİ HAVUZ", detay: "Teknik arz takibi belirsiz.", maxArz: "21 Milyon" },
+        "W": { risk: "ENFLASYON", detay: "Erken dönem kilit açılımları mevcut.", maxArz: "Yüksek Arz" }
+    };
+
+    async function entegreEtVeYukle() {
+        try {
+            document.getElementById("info").innerText = "⏳ Binance veri matrisi senkronize ediliyor...";
+            const infoRes = await fetch('https://api.binance.com/api/v3/exchangeInfo');
+            const infoData = await infoRes.json();
+
+            let currentRank = 1;
+            backupCryptoMatrix = infoData.symbols
+                .filter(s => s.status === 'TRADING' && s.symbol.endsWith('USDT') && !s.symbol.includes("UP") && !s.symbol.includes("DOWN"))
+                .map(s => {
+                    return { "rank": currentRank++, "symbol": s.baseAsset, "pair": s.symbol };
+                });
+            document.getElementById("info").style.color = "var(--green)";
+            document.getElementById("info").innerText = `✅ Bağlantı kuruldu! Toplam ${backupCryptoMatrix.length} adet canlı parite hazır.`;
+        } catch (error) {
+            console.error(error);
+            document.getElementById("info").style.color = "var(--red)";
+            document.getElementById("info").innerText = "❌ Binance API bağlantı hatası! Sayfayı yenileyin.";
+        }
+    }
+
+    window.onload = function() { entegreEtVeYukle(); };
+
+    function calculateTDSequential(klines) {
+        if (!klines || klines.length < 14) return { setup: "N/A", type: "Yatay" };
+        let buySetup = 0;
+        let sellSetup = 0;
+        
+        for (let i = klines.length - 13; i < klines.length; i++) {
+            if(i < 4) continue;
+            let closeCurrent = parseFloat(klines[i][4]);
+            let closeMinus4 = parseFloat(klines[i-4][4]);
+            
+            if (closeCurrent < closeMinus4) {
+                buySetup++;
+                sellSetup = 0;
+            } else if (closeCurrent > closeMinus4) {
+                sellSetup++;
+                buySetup = 0;
+            } else {
+                buySetup = 0;
+                sellSetup = 0;
+            }
+        }
+        
+        if (buySetup > 0) return { setup: `B${buySetup}`, type: buySetup >= 8 ? "T9 AL" : "Düşüş" };
+        if (sellSetup > 0) return { setup: `S${sellSetup}`, type: sellSetup >= 8 ? "T9 SAT" : "Yükseliş" };
+        return { setup: "TD0", type: "N/A" };
+    }
+
+    function calculateCMF(klines, period = 20) {
+        if (!klines || klines.length < period) return 0;
+        let totalMfV = 0;
+        let totalVol = 0;
+        
+        for (let i = klines.length - period; i < klines.length; i++) {
+            let close = parseFloat(klines[i][4]);
+            let low = parseFloat(klines[i][3]);
+            let high = parseFloat(klines[i][2]);
+            let vol = parseFloat(klines[i][5]);
+            
+            let clv = ((close - low) - (high - close)) / ((high - low) === 0 ? 0.00001 : (high - low));
+            totalMfV += (clv * vol);
+            totalVol += vol;
+        }
+        return totalVol === 0 ? 0 : (totalMfV / totalVol);
+    }
+
+    function calculateSuperTrend(klines, period = 10, multiplier = 3) {
+        if (!klines || klines.length < period + 1) return { trend: "N/A", isBullish: false };
+        
+        let tr = [];
+        for (let i = 1; i < klines.length; i++) {
+            let h = parseFloat(klines[i][2]);
+            let l = parseFloat(klines[i][3]);
+            let pc = parseFloat(klines[i-1][4]);
+            tr.push(Math.max(h - l, Math.abs(h - pc), Math.abs(l - pc)));
+        }
+        
+        let atr = new Array(klines.length).fill(0);
+        let sumTr = 0;
+        for(let i=0; i<period; i++) sumTr += tr[i];
+        atr[period] = sumTr / period;
+        for(let i = period + 1; i < klines.length; i++) {
+            atr[i] = (atr[i-1] * (period - 1) + tr[i-1]) / period;
+        }
+        
+        let trend = true; 
+        
+        let firstHigh = parseFloat(klines[period][2]);
+        let firstLow = parseFloat(klines[period][3]);
+        let upperBand = (firstHigh + firstLow) / 2 + (multiplier * atr[period]);
+        let lowerBand = (firstHigh + firstLow) / 2 - (multiplier * atr[period]);
+        
+        for (let i = period; i < klines.length; i++) {
+            let close = parseFloat(klines[i][4]);
+            let high = parseFloat(klines[i][2]);
+            let low = parseFloat(klines[i][3]);
+            let hl2 = (high + low) / 2;
+            
+            let basicUpperBand = hl2 + (multiplier * atr[i]);
+            let basicLowerBand = hl2 - (multiplier * atr[i]);
+            
+            let prevClose = parseFloat(klines[i-1][4]);
+            
+            upperBand = (basicUpperBand < upperBand || prevClose > upperBand) ? basicUpperBand : upperBand;
+            lowerBand = (basicLowerBand > lowerBand || prevClose < lowerBand) ? basicLowerBand : lowerBand;
+            
+            if (close > upperBand) trend = true;
+            else if (close < lowerBand) trend = false;
+        }
+        return { trend: trend ? "🟢 BUY" : "🔴 SELL", isBullish: trend };
+    }
+
+    function calculateAllRSI(klines) {
+        if (!klines || klines.length < 15) return [];
+        let len = klines.length;
+        let rsiValues = new Array(len).fill(null);
+        let gains = [], losses = [];
+        
+        for (let i = 1; i < len; i++) {
+            let diff = parseFloat(klines[i][4]) - parseFloat(klines[i-1][4]);
+            gains.push(diff > 0 ? diff : 0);
+            losses.push(diff < 0 ? Math.abs(diff) : 0);
+        }
+        
+        let sumGains = 0, sumLosses = 0;
+        for (let i = 0; i < 14; i++) { sumGains += gains[i]; sumLosses += losses[i]; }
+        let avgGain = sumGains / 14, avgLoss = sumLosses / 14;
+        
+        rsiValues[14] = avgLoss === 0 ? 100 : 100 - (100 / (1 + (avgGain / avgLoss)));
+        
+        for (let i = 14; i < gains.length; i++) {
+            avgGain = (avgGain * 13 + gains[i]) / 14;
+            avgLoss = (avgLoss * 13 + losses[i]) / 14;
+            rsiValues[i + 1] = avgLoss === 0 ? 100 : 100 - (100 / (1 + (avgGain / avgLoss)));
+        }
+        return rsiValues;
+    }
+
+    function calculateEMA(data, period) {
+        if (data.length < period) return new Array(data.length).fill(0);
+        let k = 2 / (period + 1);
+        let ema = new Array(data.length).fill(0);
+        let sum = 0; for (let i = 0; i < period; i++) sum += data[i];
+        ema[period - 1] = sum / period;
+        for (let i = period; i < data.length; i++) ema[i] = (data[i] * k) + (ema[i - 1] * (1 - k));
+        return ema;
+    }
+
+    function calculateSMA(data, period) {
+        if (data.length < period) return new Array(data.length).fill(0);
+        let sma = new Array(data.length).fill(0);
+        let sum = 0; for (let i = 0; i < period; i++) sum += data[i];
+        sma[period - 1] = sum / period;
+        for (let i = period; i < data.length; i++) { sum = sum - data[i - period] + data[i]; sma[i] = sum / period; }
+        return sma;
+    }
+
+    function checkGoldenDeathCross(klines) {
+        if (!klines || klines.length < 202) return { state: "Yetersiz Veri", isBullish: false, isBearish: false };
+        let closePrices = klines.map(k => parseFloat(k[4]));
+        let sma50 = calculateSMA(closePrices, 50);
+        let sma200 = calculateSMA(closePrices, 200);
+        let len = closePrices.length;
+        if (sma50[len - 2] <= sma200[len - 2] && sma50[len - 1] > sma200[len - 1]) return { state: "🌟 GOLDEN", isBullish: true };
+        if (sma50[len - 2] >= sma200[len - 2] && sma50[len - 1] < sma200[len - 1]) return { state: "💀 DEATH", isBearish: true };
+        return sma50[len - 1] > sma200[len - 1] ? { state: "📈 Boğa (SMA)", isBullish: true } : { state: "📉 Ayı (SMA)", isBearish: true };
+    }
+
+    function calculateMACD(klines) {
+        if (!klines || klines.length < 35) return null;
+        let closePrices = klines.map(k => parseFloat(k[4]));
+        let ema12 = calculateEMA(closePrices, 12);
+        let ema26 = calculateEMA(closePrices, 26);
+        let macdLine = ema12.map((v, i) => v - ema26[i]);
+        let signalLine = calculateEMA(macdLine, 9);
+        let len = closePrices.length;
+        return { macd: macdLine[len - 1], signal: signalLine[len - 1] };
+    }
+
+    function calculateHistoricalDip(klines) {
+        if(!klines || klines.length < 30) return null;
+        let currentPrice = parseFloat(klines[klines.length - 1][4]);
+        let lows = klines.map(k => parseFloat(k[3]));
+        let absoluteLow = Math.min(...lows);
+        let distanceToLow = ((currentPrice - absoluteLow) / (absoluteLow === 0 ? 1 : absoluteLow)) * 100;
+        return { isPureDip: distanceToLow <= 1.5, distance: distanceToLow.toFixed(2) };
+    }
+
+    function checkBullishDivergence(klines, rsiValues) {
+        if (!klines || klines.length < 35 || rsiValues.length < 35) return { isDiv: false };
+        let len = klines.length;
+        let currentLow = parseFloat(klines[len - 1][3]);
+        let currentRSI = rsiValues[len - 1];
+        if(currentRSI > 45) return { isDiv: false };
+        
+        for(let i = len - 25; i < len - 1; i++) {
+            let pastLow = parseFloat(klines[i][3]);
+            let pastRSI = rsiValues[i];
+            if(currentLow < pastLow && currentRSI > pastRSI && pastRSI < 35) return { isDiv: true };
+        }
+        return { isDiv: false };
+    }
+
+    function calculateVWMAAndCross(klines, period = 20) {
+        if (!klines || klines.length < (period + 2)) return { state: "N/A", isBullish: false };
+        let len = klines.length;
+        let calcVWMA = (offset) => {
+            let pv = 0, v = 0;
+            for(let i=0; i<period; i++) {
+                let k = klines[len - 1 - i - offset];
+                pv += parseFloat(k[4]) * parseFloat(k[5]); v += parseFloat(k[5]);
+            }
+            return v === 0 ? 0 : pv / v;
+        };
+        let vwmaCurrent = calcVWMA(0), vwmaPrev = calcVWMA(1);
+        let closePrices = klines.map(k => parseFloat(k[4]));
+        let sma = calculateSMA(closePrices, period);
+        let smaCurrent = sma[len-1], smaPrev = sma[len-2];
+
+        if (vwmaPrev <= smaPrev && vwmaCurrent > smaCurrent) return { state: "🚀 Yukarı Kesme", isBullish: true };
+        return vwmaCurrent > smaCurrent ? { state: "📈 Boğa", isBullish: true } : { state: "📉 Ayı", isBullish: false };
+    }
+
+    function generateTradeSignal(rsiNow, rsiPrev, macdData, dipData, divData, rsiLimit, coinSymbol, vwmaData, tdData, cmfData, superTrend) {
+        const bugun = new Date(); if (coinSymbol === "STRK" && (bugun.getDate() >= 12 && bugun.getDate() <= 17)) return { action: "RİSK", class: "trade-sell", rowClass: "row-risk", confirmed: false, isCustomReason: true, reason: "KİLİT" };
+
+        let score = 0;
+        if (rsiNow && rsiNow <= rsiLimit) score += 2;
+        if (divData && divData.isDiv) score += 3; 
+        if (macdData && macdData.macd > macdData.signal) score += 1;
+        if (vwmaData && vwmaData.isBullish) score += 1;
+        if (superTrend && superTrend.isBullish) score += 2;
+        if (cmfData > 0.05) score += 2; 
+        if (tdData && tdData.type === "T9 AL") score += 3; 
+
+        if (score >= 6 || (tdData.type === "T9 AL" && cmfData > 0) || (divData.isDiv && superTrend.isBullish)) {
+            return { action: "AL", class: "trade-buy", rowClass: "row-buy", confirmed: score >= 8 };
+        }
+        if (rsiNow >= 70 || tdData.type === "T9 SAT" || (superTrend.trend.includes("SELL") && cmfData < -0.1)) {
+            return { action: "SAT", class: "trade-sell", rowClass: "row-sell", confirmed: true };
+        }
+        return { action: "BEKLE", class: "trade-hold", rowClass: "", confirmed: false };
+    }
+
+    async function huntCombinations() {
+        const btn = document.getElementById("btn");
+        const tf = document.getElementById("tf").value;
+        const filterChoice = document.getElementById("filterChoice").value;
+        const rsiLimit = parseFloat(document.getElementById("limit").value);
+        const strategyMode = document.getElementById("strategyMode").value;
+        const info = document.getElementById("info"); const barBg = document.getElementById("barBg");
+        const bar = document.getElementById("bar"); const table = document.getElementById("table"); const list = document.getElementById("list");
+
+        btn.disabled = true; table.style.display = "none"; list.innerHTML = ""; barBg.style.display = "block"; bar.style.width = "0%";
+        info.style.color = "var(--text)"; let targets = [];
+
+        try {
+            info.innerText = "⚡ Canlı hacim verileri Binance'ten çekiliyor...";
+            const tickerRes = await fetch("https://api.binance.com/api/v3/ticker/24hr");
+            const tickerData = await tickerRes.json();
+
+            let min = 0, max = Infinity;
+            if(filterChoice === "100k-500k") { min = 100000; max = 500000; }
+            else if(filterChoice === "500k-2m") { min = 500000; max = 2000000; }
+            else if(filterChoice === "2m-all") { min = 2000000; }
+
+            targets = backupCryptoMatrix.map(coin => {
+                const ticker = tickerData.find(t => t.symbol === coin.pair);
+                const quoteVol = ticker ? parseFloat(ticker.quoteVolume) : 0;
+                return {
+                    symbol: coin.pair, pureSymbol: coin.symbol, volume: quoteVol,
+                    volumeText: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(quoteVol),
+                    price: ticker ? parseFloat(ticker.lastPrice) : 0
+                };
+            }).filter(coin => coin.volume >= min && coin.volume <= max);
+
+            if (targets.length === 0) throw new Error("Kriterlere uygun parite bulunamadı.");
+
+            const chunkSize = 15; 
+            for (let i = 0; i < targets.length; i += chunkSize) {
+                const chunk = targets.slice(i, i + chunkSize);
+                bar.style.width = `${((i + chunk.length) / targets.length) * 100}%`;
+                info.innerText = `🔍 Canlı Tarama: %${Math.round(((i + chunk.length) / targets.length) * 100)} (${chunk[chunk.length - 1].pureSymbol})`;
+
+                await Promise.all(chunk.map(async (coin) => {
+                    try {
+                        const kRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin.symbol}&interval=${tf}&limit=300`);
+                        if(!kRes.ok) return;
+                        const klines = await kRes.json();
+                        if(!klines || klines.length < 50) return;
+
+                        let rsiValues = calculateAllRSI(klines);
+                        let rsiNow = rsiValues[rsiValues.length - 1];
+                        let rsiPrev = rsiValues[rsiValues.length - 2];
+                        
+                        let macdData = calculateMACD(klines);
+                        let dipData = calculateHistoricalDip(klines);
+                        let divData = checkBullishDivergence(klines, rsiValues);
+                        let vwmaData = calculateVWMAAndCross(klines, 20);
+                        let crossData = checkGoldenDeathCross(klines);
+                        
+                        let tdData = calculateTDSequential(klines);
+                        let cmfData = calculateCMF(klines, 20);
+                        let superTrend = calculateSuperTrend(klines, 10, 3);
+
+                        let isReversal = (rsiPrev !== null && rsiNow < rsiLimit && rsiNow > rsiPrev) || (tdData.type === "T9 AL");
+                        let isPureDip = (rsiNow <= rsiLimit && dipData && dipData.isPureDip);
+                        if (strategyMode === "reversal" && !isReversal && !divData.isDiv) return;
+                        if (strategyMode === "pure_dip" && !isPureDip) return;
+
+                        let tradeSignal = generateTradeSignal(rsiNow, rsiPrev, macdData, dipData, divData, rsiLimit, coin.pureSymbol, vwmaData, tdData, cmfData, superTrend);
+
+                        let signalType = "Yatay";
+                        if (divData.isDiv) signalType = "Pozitif Uyuşmazlık";
+                        else if (tdData.type === "T9 AL") signalType = "T9 AL Sinyali";
+                        else if (isPureDip) signalType = "Mutlak Dip";
+
+                        let onayRozeti = tradeSignal.isCustomReason ? `<span class="badge" style="color:#e67e22; background:rgba(230,126,34,0.12); border:1px solid #e67e22;">KİLİT</span>` : 
+                                            (tradeSignal.confirmed ? '<span class="badge badge-confirm badge-strong-confirm">GÜÇLÜ</span>' : '<span class="badge badge-confirm badge-weak-confirm">Zayıf</span>');
+
+                        let tdColor = tdData.type === "T9 AL" ? "var(--green)" : (tdData.type === "T9 SAT" ? "var(--red)" : "var(--text)");
+                        let cmfColor = cmfData > 0 ? "var(--green)" : "var(--red)";
+                        let stColor = superTrend.isBullish ? "var(--green)" : "var(--red)";
+
+                        const row = document.createElement("tr");
+                        // Satır sınıfına rowClass (row-buy veya row-sell) eklenerek boydan boya renklendirme sağlandı
+                        row.className = `match-row ${tradeSignal.rowClass}`;
+                        row.innerHTML = `
+                            <td><strong style="font-size:15px; color:#000;">${coin.symbol}</strong></td>
+                            <td class="large-numeric" style="color:var(--text-muted);">${coin.volumeText}</td>
+                            <td><span class="badge badge-trade ${tradeSignal.class}">${tradeSignal.action}</span></td>
+                            <td style="font-weight:bold; color:${tdColor}">${tdData.setup} (${tdData.type})</td>
+                            <td style="font-weight:bold; color:${stColor}">${superTrend.trend}</td>
+                            <td class="large-numeric" style="color:${cmfColor}">${cmfData > 0 ? '+' : ''}${cmfData.toFixed(3)}</td>
+                            <td style="font-weight:700; color:${vwmaData.isBullish?'var(--green)':'var(--red)'}">${vwmaData.state}</td>
+                            <td class="large-numeric" style="color:${rsiNow <= rsiLimit ? 'var(--green)' : 'var(--text)'}"><b>${rsiNow ? rsiNow.toFixed(2) : "N/A"}</b></td>
+                            <td style="font-weight:700; color:${macdData && macdData.macd > macdData.signal ? '#0db372':'#df334a'}">${macdData ? (macdData.macd > macdData.signal ? '🐂 Boğa' : '🐻 Ayı') : "N/A"}</td>
+                            <td><span class="badge" style="background:rgba(199,157,0,0.1); color:var(--gold)">${signalType}</span></td>
+                            <td>${onayRozeti}</td>
+                            <td style="font-weight:700; font-size:12px; color:${crossData.isBullish ? 'var(--green)':'var(--red)'}">${crossData.state}</td>
+                            <td class="large-numeric" style="color:var(--blue)">%${dipData ? dipData.distance : "0.00"}</td>
+                            <td class="large-numeric" style="color:#b08b00">$${coin.price.toLocaleString('en-US',{maximumFractionDigits:5})}</td>
+                        `;
+                        list.appendChild(row);
+                    } catch (e) { console.error(e); }
+                }));
+                await new Promise(r => setTimeout(r, 60));
+            }
+
+            document.getElementById("info").style.color = "var(--green)";
+            document.getElementById("info").innerText = `🎯 Tarama Tamamlandı! Toplam ${list.children.length} parite listelendi.`;
+            table.style.display = "table";
+
+        } catch (error) {
+            console.error(error); document.getElementById("info").style.color = "var(--red)";
+            document.getElementById("info").innerText = "❌ Hata: " + error.message;
+        } finally { btn.disabled = false; barBg.style.display = "none"; }
+    }
+</script>
+
+</body>
+</html>
